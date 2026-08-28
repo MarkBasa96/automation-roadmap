@@ -47,6 +47,8 @@ guessed at. Several official pages that used to be canonical (n8n's `/video-cour
 
 ## Getting started
 
+**Live site:** https://markbasa96.github.io/automation-roadmap/
+
 **Just use it:** open `index.html` in any modern browser. That's it.
 
 **Testing videos and music locally:** YouTube refuses to embed on a `file://` path — you'll
