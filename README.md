@@ -85,6 +85,8 @@ been exported.
 
 ## Deploying to GitHub Pages
 
+This repo is already deployed at the URL above. To deploy your own fork:
+
 1. Create a new repository on GitHub (public, no README — you already have one).
 2. Push these files to the repository root:
    ```
@@ -127,7 +129,7 @@ background music. Nothing else is loaded and nothing is sent anywhere.
 
 ## Credits
 
-Roadmap content and site by [@joemarkloarbasa](https://github.com/joemarkloarbasa).
+Roadmap content and site by [@MarkBasa96](https://github.com/MarkBasa96).
 
 Learning resources link to their original creators — HubSpot Academy, GoHighLevel's support
 portal, Zapier Academy, Make Academy, n8n Academy and docs, Airtable Academy, Lovable's
