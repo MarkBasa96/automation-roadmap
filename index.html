@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Automation VA Roadmap</title>
+<meta name="description" content="A 12-week interactive learning roadmap for becoming an AI automation specialist as a technical VA." />
+<!-- favicon / tab icon -->
+<link rel="icon" type="image/png" sizes="32x32" href="Pics/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="256x256" href="Pics/favicon-512.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="Pics/apple-touch-icon.png" />
+<meta name="theme-color" content="#4f46e5" />
+
+<!-- link previews (LinkedIn, Slack, Discord, X) -->
+<meta property="og:title" content="AI Automation VA Roadmap" />
+<meta property="og:description" content="A 12-week interactive learning roadmap for becoming an AI automation specialist as a technical VA. 8 tracks, 84 daily tasks, one hour a day." />
+<meta property="og:type" content="website" />
+<!-- og:image MUST be an absolute URL — link previews ignore relative paths.
+     After your first GitHub Pages deploy, replace the line below with e.g.
+     https://markbasa96.github.io/<repo-name>/Pics/favicon-512.png -->
+<meta property="og:image" content="Pics/favicon-512.png" />
+<meta name="twitter:card" content="summary" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ MOBILE TOP BAR ============ -->
+<header class="topbar">
+  <button class="icon-btn" id="menuToggle" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <div class="topbar-title">
+    <span class="mark" aria-hidden="true">⚡</span>
+    <span>Automation Roadmap</span>
+  </div>
+  <button class="icon-btn" id="themeToggleMobile" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="app-label"><span aria-hidden="true">⚡</span> Automation Roadmap</div>
+      <button class="pcard" id="pcard" title="Edit your details">
+        <span class="pcard-av" id="pcardAv" aria-hidden="true">?</span>
+        <span class="pcard-text">
+          <span class="pcard-name" id="pcardName">Set up your profile</span>
+          <span class="pcard-sub" id="pcardSub">Technical VA → AI Automation</span>
+        </span>
+        <svg class="pcard-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <div class="nav-label">Program</div>
+      <button class="nav-item" data-view="overview">
+        <span class="nav-ico" aria-hidden="true">◎</span> Overview
+      </button>
+      <button class="nav-item" data-view="calendar">
+        <span class="nav-ico" aria-hidden="true">▦</span> 84-Day Calendar
+      </button>
+      <button class="nav-item" data-view="compare">
+        <span class="nav-ico" aria-hidden="true">⇄</span> Tool Comparison
+      </button>
+      <button class="nav-item" data-view="certificates">
+        <span class="nav-ico" aria-hidden="true">✦</span> Certificates
+        <span class="nav-badge" id="navBadgeCount" hidden>0</span>
+      </button>
+
+      <button class="nav-drop" id="tracksDrop" aria-expanded="true" aria-controls="trackNav">
+        <svg class="nav-drop-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span>Tracks</span>
+        <span class="nav-drop-count" id="tracksCount">0/8</span>
+      </button>
+      <div id="trackNav"></div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <!-- Settings menu — pops up like a system power menu -->
+      <div class="smenu" id="settingsMenu" hidden role="menu">
+        <div class="smenu-label">Profile</div>
+        <button class="smenu-item" id="profileBtn" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+          <span id="profileLabel">Your details</span>
+        </button>
+        <button class="smenu-item" id="switchBtn" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7"/></svg>
+          Switch profile
+        </button>
+
+        <div class="smenu-sep"></div>
+        <div class="smenu-label">Preferences</div>
+        <button class="smenu-item" id="themeToggle" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <span id="themeLabel">Dark mode</span>
+        </button>
+        <button class="smenu-item" id="autoplayToggle" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9V3z"/></svg>
+          <span id="autoplayLabel">Autoplay: on</span>
+        </button>
+
+        <div class="smenu-sep"></div>
+        <button class="smenu-item" id="aboutBtn" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.5v5M12 7.5v.6"/></svg>
+          About the developer
+        </button>
+        <button class="smenu-item danger" id="resetBtn" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+          Reset everything
+        </button>
+      </div>
+
+      <button class="ghost-btn settings-trigger" id="settingsBtn" aria-haspopup="menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mini-ico"><circle cx="12" cy="12" r="3.2"/><path d="M19.1 14.6a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.4a1.7 1.7 0 0 0-2.95-1.15l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 3.4 13.7H3a2 2 0 1 1 0-4h.4a1.7 1.7 0 0 0 1.15-2.95l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 10.3 3.4V3a2 2 0 1 1 4 0v.4a1.7 1.7 0 0 0 2.95 1.15l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 20.6 10.3H21a2 2 0 1 1 0 4h-.4a1.7 1.7 0 0 0-1.5 1.15z"/></svg>
+        Settings
+        <span class="settings-caret" aria-hidden="true">⌃</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main" id="main">
+
+    <!-- storage warning -->
+    <div class="alert" id="storageAlert" hidden>
+      <strong>Heads up:</strong> <span id="storageAlertText"></span>
+    </div>
+
+    <!-- ---------- OVERVIEW ---------- -->
+    <section class="view" id="view-overview">
+
+      <div class="page-head">
+        <p class="eyebrow">12 weeks · 84 days · ~1 hour per day</p>
+        <h1>Your path to AI automation specialist</h1>
+        <p class="lede">
+          Eight tracks, sequenced so each one makes the next easier. CRMs first (they're the
+          system of record everything else plugs into), then a data layer, then automation
+          connectors from simplest to most technical, then AI, then a capstone you can show clients.
+        </p>
+      </div>
+
+      <!-- GREETING -->
+      <div class="greet" id="greet">
+        <span class="greet-emoji" id="greetEmoji">👋</span>
+        <p class="greet-text" id="greetText"></p>
+      </div>
+
+      <!-- RESUME -->
+      <button class="resume" id="resumeBar">
+        <span class="resume-ico" id="resumeIco">▶</span>
+        <span class="resume-text">
+          <span class="resume-label" id="resumeLabel">Continue where you left off</span>
+          <span class="resume-task" id="resumeTask">—</span>
+        </span>
+        <span class="resume-go">Jump there <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </button>
+
+      <!-- TODAY'S FOCUS -->
+      <section class="focus-card" id="focusCard" aria-labelledby="focusHeading">
+        <div class="focus-main">
+          <div class="focus-top">
+            <h2 id="focusHeading">Today's Focus</h2>
+            <span class="chip" id="focusDayChip">Day —</span>
+          </div>
+          <div id="focusBody">
+            <p class="focus-empty">Set your start date to unlock today's 1-hour task →</p>
+          </div>
+        </div>
+        <div class="focus-side">
+          <label class="field">
+            <span class="field-label">Program start date</span>
+            <input type="date" id="startDate" />
+          </label>
+          <p class="field-hint">Study slot: <strong>7:00 PM daily</strong>. Set the calendar reminder yourself — a web page can't push notifications on its own.</p>
+        </div>
+      </section>
+
+      <!-- PROGRESS -->
+      <section class="stats-grid" aria-label="Progress summary">
+        <div class="card ring-card">
+          <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="ring-bg" cx="60" cy="60" r="52"/>
+              <circle class="ring-fg" cx="60" cy="60" r="52" id="ringFg"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-pct" id="ringPct">0%</div>
+              <div class="ring-sub">complete</div>
+            </div>
+          </div>
+          <div class="ring-meta">
+            <div class="ring-title">Overall progress</div>
+            <div class="ring-line"><span id="doneCount">0</span> of <span id="totalCount">84</span> daily tasks checked off</div>
+          </div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-label">Tracks complete</div>
+          <div class="stat-value" id="tracksDone">0<span class="stat-of">/8</span></div>
+          <div class="stat-foot" id="tracksFoot">Finish a track to unlock its badge</div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-label">Current week</div>
+          <div class="stat-value" id="currentWeek">—</div>
+          <div class="stat-foot" id="currentWeekFoot">Set a start date to begin</div>
+        </div>
+
+        <div class="card stat-card">
+          <div class="stat-label">Streak potential</div>
+          <div class="stat-value" id="daysLeft">84<span class="stat-of"> days</span></div>
+          <div class="stat-foot">At 1 hour/day, 7 days a week</div>
+        </div>
+      </section>
+
+      <!-- TRACK CARDS -->
+      <h2 class="section-title">The eight tracks</h2>
+      <p class="section-sub">Click any track to open its weeks, tasks, and video resources.</p>
+      <div class="track-grid" id="trackGrid"></div>
+
+      <!-- WHY THESE TOOLS -->
+      <h2 class="section-title">Why these tools, and why in this order</h2>
+      <div class="prose card pad">
+        <p><strong>CRMs come first (Weeks 1–4).</strong> Every automation you'll ever build for a client ends up
+        reading from or writing to a CRM. Learning HubSpot first gives you clean vocabulary — contact,
+        company, deal, property, pipeline, workflow — that transfers everywhere. GoHighLevel second, because
+        once you know what a CRM <em>is</em>, GHL's sprawling all-in-one interface stops being overwhelming and
+        starts looking like "a CRM plus a bunch of bolted-on channels."</p>
+
+        <p><strong>Airtable is the addition I'd fight for (Week 5).</strong> It isn't in your original list, but
+        in real VA work it's the piece that makes everything else possible: a place to put data that isn't a
+        CRM record. Client request queues, content calendars, inventory, job trackers — automations need
+        somewhere to read and write structured data, and spinning up a real database is out of scope for a VA.
+        Airtable is that layer, and Zapier/Make/n8n all connect to it natively. One week, high payoff.</p>
+
+        <p><strong>Connectors go simplest → hardest (Weeks 6–8, 10–11).</strong> Zapier teaches the mental model
+        (trigger → action) with almost no friction. Make forces you to actually see data flowing through a
+        scenario, which is where real understanding lives. n8n comes last because it assumes you already know
+        both, and adds hosting, credentials, and JavaScript on top.</p>
+
+        <p><strong>The AI layer sits between Make and n8n (Week 9).</strong> This is the second addition, and it's
+        the one that makes you an "AI automation specialist" rather than an "automation VA." Knowing how to call
+        an LLM API from inside a workflow — with a constrained prompt and structured JSON output — is the single
+        highest-leverage skill on this list in 2026. It's placed after Make so you have an HTTP module to
+        practice in, and before n8n so the n8n capstone can use it properly.</p>
+
+        <p><strong>Lovable is the capstone (Week 12).</strong> Not because it's hardest, but because it's the
+        track that produces something a client can look at. By then you'll have a CRM, a database, and a
+        workflow engine to wire it into — so the app you build is a real front end on a real system, not a demo.</p>
+
+        <p class="note"><strong>What I deliberately left out:</strong> Notion (overlaps Airtable for this use
+        case), Slack/Discord bots (a notification step, not a skill), Bubble/Webflow (months of study for
+        something Lovable now covers at VA scale), and Python (genuinely valuable, but it's a different career
+        branch and would blow past 12 weeks).</p>
+      </div>
+    </section>
+
+    <!-- ---------- TRACK DETAIL ---------- -->
+    <section class="view" id="view-track" hidden>
+      <div id="trackDetail"></div>
+    </section>
+
+    <!-- ---------- CALENDAR ---------- -->
+    <section class="view" id="view-calendar" hidden>
+      <div class="page-head">
+        <p class="eyebrow">Daily schedule</p>
+        <h1>The 84-day calendar</h1>
+        <p class="lede">Every day maps to exactly one ~1-hour task. Set your start date on the Overview page and
+        real dates appear here. Today is outlined.</p>
+      </div>
+      <div class="cal-legend" id="calLegend"></div>
+      <div class="cal-scroll">
+        <div class="cal" id="calendar"></div>
+      </div>
+    </section>
+
+    <!-- ---------- COMPARISON ---------- -->
+    <section class="view" id="view-compare" hidden>
+      <div class="page-head">
+        <p class="eyebrow">Reach for the right tool</p>
+        <h1>Where these tools overlap — and where they don't</h1>
+        <p class="lede">Zapier, Make and n8n all do trigger/action automation. HubSpot and GHL are both CRMs.
+        The money is in knowing which one to recommend, not in knowing where the buttons are.</p>
+      </div>
+
+      <h2 class="section-title">CRM: HubSpot vs GoHighLevel</h2>
+      <div class="table-scroll">
+        <table class="cmp">
+          <thead><tr><th>Dimension</th><th>HubSpot</th><th>GoHighLevel</th></tr></thead>
+          <tbody>
+            <tr><td>Core idea</td><td>One centralized contact record shared across sales, marketing and service</td><td>All-in-one agency stack: CRM + SMS + email + funnels + sites + automation</td></tr>
+            <tr><td>Pricing shape</td><td>Free tier, then per-seat and per-contact tiers that climb steeply</td><td>Flat fee, roughly $97–$297/mo, unlimited sub-accounts on the agency plan</td></tr>
+            <tr><td>Built for</td><td>One company, multiple teams needing alignment and clean reporting</td><td>One agency managing many client accounts at once</td></tr>
+            <tr><td>Reporting</td><td>Genuinely strong — custom reports, attribution, forecasting</td><td>Functional but shallower; you'll export for serious analysis</td></tr>
+            <tr><td>Native SMS / phone</td><td>Add-on, extra cost</td><td>Built in and central to the product</td></tr>
+            <tr><td>Websites / funnels</td><td>CMS is a separate paid hub</td><td>Included funnel and site builder</td></tr>
+            <tr><td>You'd pitch it when…</td><td>Client has a sales team, cares about data quality and reporting, and will grow into paid tiers</td><td>Client is a local service business or you're running several clients and need one flat-fee platform</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="section-title">Automation: Zapier vs Make vs n8n</h2>
+      <div class="table-scroll">
+        <table class="cmp">
+          <thead><tr><th>Dimension</th><th>Zapier</th><th>Make.com</th><th>n8n</th></tr></thead>
+          <tbody>
+            <tr><td>Mental model</td><td>A list: when this, then that, then that</td><td>A map: modules wired on a canvas, data visibly flowing</td><td>A map with a terminal attached</td></tr>
+            <tr><td>App library</td><td>Largest by a wide margin</td><td>Large, slightly behind Zapier</td><td>Smallest native set — but any REST API via HTTP node</td></tr>
+            <tr><td>Branching</td><td>Paths (limited branches), filters</td><td>Routers with unlimited routes and per-route filters</td><td>IF / Switch nodes, loops, sub-workflows</td></tr>
+            <tr><td>Error handling</td><td>Basic: autoreplay, error emails</td><td>Explicit error routes: Ignore, Resume, Commit, Rollback, Break</td><td>Full error workflows, retries, custom fallback logic</td></tr>
+            <tr><td>Custom code</td><td>Code steps exist but are an escape hatch</td><td>Functions and an HTTP module; no full code environment</td><td>First-class JavaScript/Python Code nodes</td></tr>
+            <tr><td>Hosting</td><td>Cloud only</td><td>Cloud only</td><td>Cloud <em>or</em> self-hosted (open source)</td></tr>
+            <tr><td>Cost at volume</td><td>Most expensive per task</td><td>Considerably cheaper per operation</td><td>Cheapest at scale, especially self-hosted</td></tr>
+            <tr><td>Reach for it when…</td><td>The workflow is linear, the client is non-technical, and speed to working matters more than cost</td><td>You need branching, loops over arrays, real error handling, or the task volume makes Zapier expensive</td><td>You need custom code, self-hosting for data-privacy reasons, AI agents with tools, or high volume</td></tr>
+            <tr><td>Client handoff</td><td>Easiest — clients can read a Zap</td><td>Moderate — the canvas needs a walkthrough</td><td>Hardest — you're effectively the maintainer</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="section-title">Building tools: Lovable vs no-code vs real code</h2>
+      <div class="table-scroll">
+        <table class="cmp">
+          <thead><tr><th>Dimension</th><th>Lovable</th><th>No-code (Airtable Interfaces, GHL funnels)</th><th>Traditional code</th></tr></thead>
+          <tbody>
+            <tr><td>How you build</td><td>Describe it in plain English; AI writes real React code</td><td>Drag, configure, stay inside the platform</td><td>You write and host everything</td></tr>
+            <tr><td>Ceiling</td><td>High — it's real code you can export to GitHub</td><td>Low — you hit platform limits fast</td><td>Unlimited</td></tr>
+            <tr><td>Time to first working thing</td><td>Minutes</td><td>Minutes</td><td>Days to weeks</td></tr>
+            <tr><td>What breaks</td><td>You need enough judgement to spot when the AI does something wrong</td><td>Nothing breaks, you just can't do the thing</td><td>Everything, and you fix it</td></tr>
+            <tr><td>Career positioning</td><td>"I can ship a custom client tool in a week" — a genuine differentiator for a VA</td><td>Table stakes</td><td>A different job title</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------- CERTIFICATES ---------- -->
+    <section class="view" id="view-certificates" hidden>
+      <div class="page-head">
+        <p class="eyebrow">Proof of work</p>
+        <h1>Certificates &amp; badges</h1>
+        <p class="lede">Each track unlocks a badge at 100%. Clear all eight and the Master Certificate unlocks —
+        printable, with your name on it.</p>
+      </div>
+      <div class="badge-grid" id="badgeGrid"></div>
+
+      <div class="master-card" id="masterCard">
+        <div class="master-lock" id="masterLock">
+          <div class="master-icon" aria-hidden="true">🔒</div>
+          <h2>Master Certificate</h2>
+          <p>Complete all eight tracks to unlock.</p>
+          <div class="master-bar"><div class="master-bar-fill" id="masterBarFill"></div></div>
+          <p class="master-count"><span id="masterDone">0</span> / 8 tracks complete</p>
+        </div>
+        <div class="master-open" id="masterOpen" hidden>
+          <div class="master-icon" aria-hidden="true">🏆</div>
+          <h2>Master Certificate unlocked</h2>
+          <p>All eight tracks complete. Put your name on it and print it.</p>
+          <button class="btn primary" id="openCertBtn">Open certificate</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ FOCUS TIMER + LOFI PLAYER ============ -->
+<div class="utilbar" id="utilBar">
+  <div class="util util-timer">
+    <button class="util-btn primary" id="timerToggle" title="Start / pause focus timer">▶</button>
+    <div class="util-body">
+      <div class="util-time" id="timerTime">00:00</div>
+      <div class="util-meta" id="timerMeta">focus timer · paused</div>
+      <div class="util-track"><div class="util-track-fill" id="timerFill"></div></div>
+    </div>
+    <button class="util-btn ghost" id="timerReset" title="Reset timer to zero">↺</button>
+  </div>
+
+  <div class="util util-music">
+    <button class="util-btn primary" id="musicToggle" title="Play / pause music">♪</button>
+    <div class="util-body">
+      <div class="util-meta" id="musicName">lofi · loading…</div>
+      <div class="util-row">
+        <input type="range" id="musicVol" min="0" max="100" step="1" value="35" aria-label="Music volume" />
+        <select id="musicPick" aria-label="Choose a station">
+          <option value="jfKfPfyJRdk">Lofi Girl radio</option>
+          <option value="lP26UCnoH9s">Coffee Shop Radio ☕</option>
+          <option value="kgx4WGK0oNU">Jazz / lofi hip hop 🌱</option>
+          <option value="CFGLoQIhmow">Lofi hip hop mix</option>
+          <option value="1Tl2FtV06qo">Asian lofi radio ⛩️</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="util-collapse" id="utilCollapse" title="Hide">–</button>
+</div>
+<button class="util-open" id="utilOpen" hidden aria-label="Show focus timer and music">⏱</button>
+<div id="ytHost" aria-hidden="true"><div id="ytPlayer"></div><div id="ytAbout"></div></div>
+
+<!-- ============ HOUR-UP MODAL ============ -->
+<div class="modal" id="hourModal" hidden role="dialog" aria-modal="true" aria-labelledby="hourTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel narrow">
+    <div class="welcome">
+      <div class="welcome-mark" aria-hidden="true">⏱</div>
+      <p class="welcome-kicker">Focus session complete</p>
+      <h2 id="hourTitle">That's your hour, <span id="hourName">friend</span></h2>
+      <p class="welcome-lede">
+        You've been at it for <strong id="hourLen">60 minutes</strong>. That's today's commitment done —
+        check off the task and close the laptop guilt-free, or keep the timer running if you're in flow.
+      </p>
+      <div class="welcome-actions">
+        <button class="btn primary" id="hourDone">Done for today</button>
+        <button class="btn" id="hourMore">Keep going</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div class="modal" id="aboutModal" hidden role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel">
+    <button class="about-mute icon-btn" id="aboutMute" title="Mute theme song">🔊</button>
+    <button class="about-close icon-btn" data-close-modal aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div class="about">
+      <div class="about-banner">
+        <img src="Pics/joe-banner.jpg" alt="" aria-hidden="true" />
+        <div class="about-banner-veil"></div>
+        <p class="about-eyebrow" id="aboutTitle">About the developer</p>
+      </div>
+
+      <div class="about-hero">
+        <img class="about-photo" src="Pics/joe-headshot.jpg" alt="Joemark Basa" />
+        <div class="about-id">
+          <h3>Joemark Basa <span class="about-nick">&ldquo;Joe&rdquo;</span></h3>
+          <p class="about-role">Technical VA &middot; Team Lead &middot; Automation builder</p>
+          <p class="about-loc">📍 Davao City, Philippines</p>
+        </div>
+      </div>
+
+      <!-- contacts sit right under the name so nobody has to hunt for them -->
+      <div class="about-contact top" id="aboutLinks"></div>
+
+      <div class="about-body">
+        <p><strong>Hi, I&rsquo;m Joe.</strong> Technical VA by trade, team lead by accident, automation nerd by choice.</p>
+
+        <p>Right now I lead a small team of four VAs handling around <strong>300 requests a month</strong>, and
+        most of my energy goes into making sure none of those requests need a human doing the same thing twice.
+        I&rsquo;ve shipped <strong>15+ production automations</strong> in Power Automate. My favourite one reads an
+        executive inbox, summarises the requests and attachments into a tracker, flags what&rsquo;s urgent and pings
+        the team. It took a 20-minute manual job down to about three.</p>
+
+        <p>I&rsquo;ve also built a KPI dashboard so management can actually see workload and performance instead of
+        asking for it, and a duty roster system after a weekend monitoring gap let something important slip.
+        That&rsquo;s the pattern with me: something breaks once, and I go build the thing that stops it happening again.</p>
+
+        <p class="about-callout">Here&rsquo;s the honest part, and the whole reason this site exists: I am genuinely
+        good with some of these tools and a complete beginner with others. I&rsquo;d rather show you which is which
+        than pretend otherwise.</p>
+
+        <div class="about-split">
+          <div class="about-col">
+            <h4>✅ What I actually use</h4>
+            <div class="about-chips">
+              <span class="chip-tool solid">Power Automate</span>
+              <span class="chip-tool solid">n8n</span>
+              <span class="chip-tool solid">Microsoft 365</span>
+              <span class="chip-tool solid">Google Workspace</span>
+              <span class="chip-tool solid">Asana</span>
+              <span class="chip-tool solid">Excel dashboards</span>
+              <span class="chip-tool solid">CRM pipelines</span>
+              <span class="chip-tool solid">Claude &middot; ChatGPT &middot; Copilot</span>
+            </div>
+          </div>
+          <div class="about-col">
+            <h4>📚 What this roadmap is for</h4>
+            <div class="about-chips">
+              <span class="chip-tool ghost">HubSpot</span>
+              <span class="chip-tool ghost">GoHighLevel</span>
+              <span class="chip-tool ghost">Zapier</span>
+              <span class="chip-tool ghost">Make.com</span>
+              <span class="chip-tool ghost">Airtable</span>
+              <span class="chip-tool ghost">Claude API</span>
+              <span class="chip-tool ghost">Lovable</span>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="about-h">How I got here</h4>
+        <ol class="about-time">
+          <li><b>2015 &ndash; 2019</b><span>Retail, senior sales associate. Inventory, cash handling, supervising junior staff. Where I learned that operations is mostly a lot of small things not falling over.</span></li>
+          <li><b>2019 &ndash; 2020</b><span>BPO floors &mdash; appointment setting, then sales and service. Volume, scripts, targets.</span></li>
+          <li><b>2023</b><span>First remote VA role. Executive calendars, inboxes, lead gen, social media, even video editing. The year I found out I actually liked this.</span></li>
+          <li><b>2024 &ndash; 2025</b><span>Chat support, three to four conversations at once. Speed and accuracy got drilled in permanently.</span></li>
+          <li><b>2025 &ndash; 2026</b><span>Admin VA, remote. Executive inboxes, trackers, finance claims, daily QA. Started quietly automating my own work.</span></li>
+          <li class="now"><b>2026 &ndash; now</b><span>Team Lead. Four VAs, 300+ requests a month, and the automation work that actually gets me out of bed. Finishing a Computer Science degree alongside it.</span></li>
+        </ol>
+
+        <h4 class="about-h">How I work</h4>
+        <ul class="about-list">
+          <li><b>I&rsquo;m a video learner.</b> Give me a walkthrough over a wall of documentation and I&rsquo;ll be productive in an afternoon.</li>
+          <li><b>I don&rsquo;t oversell.</b> I&rsquo;d rather say &ldquo;I haven&rsquo;t done that yet&rdquo; than wing it and get found out in week two.</li>
+          <li><b>I use AI every day and I say so.</b> Claude, ChatGPT, Copilot. This entire site was vibe coded. Pretending otherwise would be silly.</li>
+          <li><b>Explain it like I&rsquo;m brand new.</b> Skip the jargon and I go deep fast. Bury it in jargon and I go slow.</li>
+          <li><b>I build systems, I don&rsquo;t supervise them.</b> Execution and operations over strategy and oversight, every time.</li>
+        </ul>
+
+        <h4 class="about-h">What the assessments say</h4>
+        <div class="about-traits">
+          <div class="trait"><b>The Technician</b><span>BPI &middot; Analyzer family</span></div>
+          <div class="trait"><b>The Architect of Order</b><span>Instinct Modes &middot; Deep Diver</span></div>
+          <div class="trait up"><b>Energised by</b><span>Curiosity &middot; Creation</span></div>
+          <div class="trait down"><b>Drained by</b><span>Follow-Through &middot; Activation</span></div>
+        </div>
+        <p class="about-small">Which I read as: hand me a messy repeatable process and I will not sleep properly
+        until it runs itself. Ask me to chase the same checklist for the ninth week running and you will watch
+        the light go out of my eyes.</p>
+
+        <h4 class="about-h">Where I&rsquo;m headed</h4>
+        <p>I want automation-focused work. Building the systems, designing the workflows, wiring the tools
+        together &mdash; not managing the people who use them. Leading a team taught me a lot and I&rsquo;m grateful for
+        it, but I already know it isn&rsquo;t where I do my best work.</p>
+
+        <p>So in <strong>August 2026</strong> I started vibe coding, to find out what I could build if I stopped
+        waiting to feel qualified first. This site is the first thing that came out of that. Eighty-four days,
+        one hour a night at 7pm, eight tools, no skipping ahead.</p>
+
+        <p class="about-callout alt">The roadmap <em>locks</em> each week until you finish the one before it.
+        That rule wasn&rsquo;t written for you. That was written for me.</p>
+
+        <p>And if we&rsquo;re being fully transparent about motivation: I would also like to become freaky rich so I
+        can feed my cats. Everything above is roughly in service of that. 🐈</p>
+      </div>
+
+      <div class="about-stats">
+        <div class="about-stat"><b>4</b><span>VAs led</span></div>
+        <div class="about-stat"><b>300+</b><span>requests / month</span></div>
+        <div class="about-stat"><b>15+</b><span>automations shipped</span></div>
+        <div class="about-stat"><b>20→3</b><span>min saved / request</span></div>
+      </div>
+
+      <div class="about-cta">
+        <h4 class="about-h">Get in touch</h4>
+        <p class="about-small">Open to automation-focused work, and always happy to talk shop about workflows.
+        Email or LinkedIn are the fastest ways to reach me.</p>
+        <div class="about-contact" id="aboutLinks2"></div>
+      </div>
+
+      <p class="about-foot">
+        This site: plain HTML, CSS and JavaScript. No frameworks, no build step, no backend, 84 hand-written
+        daily tasks. Vibe coded with Claude, which I&rsquo;m happy to say out loud. Every learning resource links
+        to its original creator. MIT licensed.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROFILE PICKER ============ -->
+<div class="modal" id="profileModal" hidden role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel narrow">
+    <div class="welcome">
+      <div class="welcome-mark" aria-hidden="true">👥</div>
+      <p class="welcome-kicker">Profiles</p>
+      <h2 id="profileTitle">Who's studying?</h2>
+      <p class="welcome-lede">
+        Each profile keeps its own progress, name and certificates. Everything stays
+        <strong>in this browser</strong> — so use Export to carry progress to another device.
+      </p>
+
+      <div class="pf-grid" id="pfGrid"></div>
+
+      <div class="pf-tools">
+        <button class="btn" id="pfExport">⬇ Export my progress</button>
+        <button class="btn" id="pfImport">⬆ Restore from file</button>
+        <input type="file" id="pfFile" accept="application/json,.json" hidden />
+      </div>
+      <p class="w-hint pf-note">
+        Export saves a <code>.json</code> file of everything you've checked off. Restore it on any
+        device — phone, laptop, a different browser — to pick up exactly where you left off.
+      </p>
+
+      <div class="welcome-actions">
+        <button type="button" class="btn primary" id="pfClose">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ WELCOME / ONBOARDING ============ -->
+<div class="modal" id="welcomeModal" hidden role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+  <div class="modal-backdrop"></div>
+  <div class="modal-panel narrow">
+    <div class="welcome">
+      <div class="welcome-mark" aria-hidden="true">⚡</div>
+      <p class="welcome-kicker" id="welcomeKicker">12 weeks · 84 days · ~1 hour a day</p>
+      <h2 id="welcomeTitle">Let's set up your roadmap</h2>
+      <p class="welcome-lede" id="welcomeLede">
+        Your name goes on the certificates you unlock. Everything below is stored
+        <strong>only in this browser</strong> — nothing is uploaded anywhere.
+      </p>
+
+      <form id="welcomeForm" class="welcome-form" novalidate>
+        <div class="w-photo">
+          <span class="w-photo-av" id="wPhotoAv">?</span>
+          <div class="w-photo-btns">
+            <button type="button" class="btn" id="wPhotoPick">Upload a photo</button>
+            <button type="button" class="btn" id="wPhotoClear" hidden>Remove</button>
+            <input type="file" id="wPhotoFile" accept="image/*" hidden />
+            <span class="w-hint">Square works best. Resized to 256px and stored in this browser only.</span>
+          </div>
+        </div>
+
+        <label class="w-field">
+          <span class="w-label">Your full name <em>· appears on every certificate</em></span>
+          <input type="text" id="wName" placeholder="e.g. Joemark Loarbasa" autocomplete="name" required />
+          <span class="w-error" id="wNameErr" hidden>Please enter your name</span>
+        </label>
+
+        <label class="w-field">
+          <span class="w-label">Email <em>· optional</em></span>
+          <input type="email" id="wEmail" placeholder="you@example.com" autocomplete="email" />
+          <span class="w-error" id="wEmailErr" hidden>That doesn't look like a valid email</span>
+          <span class="w-hint">Used only to pre-address the congratulations email you send yourself at the end. It never leaves this device.</span>
+        </label>
+
+        <label class="w-field">
+          <span class="w-label">Start date <em>· drives Today's Focus and the calendar</em></span>
+          <input type="date" id="wStart" />
+          <span class="w-hint">Leave blank to set it later on the Overview page.</span>
+        </label>
+
+        <div class="welcome-actions">
+          <button type="submit" class="btn primary" id="wSubmit">Start the roadmap</button>
+          <button type="button" class="btn" id="wSkip">Skip for now</button>
+        </div>
+        <p class="w-hint w-skipnote" id="wSkipNote">
+          Skipping is fine — but with no name saved, we'll ask again next time you open the site.
+          You can also set it later from <strong>Your details</strong> in the sidebar.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STUDY BUDDY (right gutter game) ============ -->
+<aside class="dock" id="dock">
+  <div class="dock-head">
+    <span class="dock-title">Study Buddy</span>
+    <button class="dock-min" id="dockToggle" aria-label="Hide study buddy">–</button>
+  </div>
+  <canvas id="gameCanvas" width="260" height="300" tabindex="0"
+          aria-label="A small game. Click it, then use W A S D or arrow keys to move the cat and collect fish."></canvas>
+  <div class="dock-foot">
+    <span class="dock-score" title="Fish eaten">🐟 <strong id="gameScore">0</strong></span>
+    <span class="dock-best" title="Highest score ever recorded">🏆 <strong id="gameBest">0</strong></span>
+    <span class="dock-lives" id="gameLives" title="Lives">♥♥♥</span>
+  </div>
+  <div class="dock-foot dock-foot2">
+    <span class="dock-hint" id="gameHint">click to play</span>
+    <span class="dock-foot-right">
+      <button class="dock-reset" id="gameTalk" title="Make the cat say something">💬</button>
+      <button class="dock-reset" id="gameSound" title="Mute / unmute">🔊</button>
+      <button class="dock-reset" id="gameReset" title="Reset score to zero">reset</button>
+    </span>
+  </div>
+</aside>
+<button class="dock-open" id="dockOpen" hidden aria-label="Show study buddy">🐱</button>
+
+<!-- ============ CERTIFICATE MODAL ============ -->
+<div class="modal" id="certModal" hidden role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel">
+    <div class="modal-bar no-print">
+      <h2 id="certModalTitle">Master Certificate</h2>
+      <div class="modal-actions">
+        <label class="name-field">
+          <span>Your name</span>
+          <input type="text" id="certName" placeholder="Type your full name" autocomplete="name" />
+        </label>
+        <button class="btn primary" id="printBtn">Print / Save as PDF</button>
+        <button class="btn" id="pngBtn">Download PNG</button>
+        <button class="btn" id="emailBtn">Email me a copy</button>
+        <button class="icon-btn" data-close-modal aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="cert" id="certificate">
+      <div class="cert-inner">
+        <div class="cert-seal" aria-hidden="true">⚡</div>
+        <p class="cert-kicker">Certificate of Completion</p>
+        <h3 class="cert-title">AI Automation Specialist</h3>
+        <p class="cert-sub">Technical Virtual Assistant Program · 12 Weeks · 84 Days</p>
+        <p class="cert-awarded">This certifies that</p>
+        <p class="cert-name" id="certNameOut">Your Name</p>
+        <p class="cert-body">
+          has completed a self-directed 84-day program covering client management systems,
+          structured data, workflow automation, AI integration and applied tool building —
+          demonstrating practical competence across the following platforms:
+        </p>
+        <ul class="cert-tools" id="certTools"></ul>
+        <div class="cert-foot">
+          <div class="cert-foot-col">
+            <div class="cert-line"></div>
+            <div class="cert-foot-label">Date of completion</div>
+            <div class="cert-foot-value" id="certDate">—</div>
+          </div>
+          <div class="cert-foot-col">
+            <div class="cert-line"></div>
+            <div class="cert-foot-label">Program</div>
+            <div class="cert-foot-value">Technical VA → AI Automation Specialist</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TRACK BADGE MODAL ============ -->
+<div class="modal" id="badgeModal" hidden role="dialog" aria-modal="true" aria-labelledby="badgeModalTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel narrow">
+    <div class="modal-bar no-print">
+      <h2 id="badgeModalTitle">Track Certificate</h2>
+      <div class="modal-actions">
+        <button class="btn primary" id="printBadgeBtn">Print / Save as PDF</button>
+        <button class="btn" id="pngBadgeBtn" data-track="">Download PNG</button>
+        <button class="icon-btn" data-close-modal aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="cert small" id="badgeCert"></div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
