@@ -444,6 +444,174 @@ const BRAND = {
   }
 };
 
+/* =========================================================
+   CONFETTI — fired when a track reaches 100%.
+   A throwaway full-screen canvas that removes itself when the
+   last piece falls, so it costs nothing the rest of the time.
+   ========================================================= */
+function confetti(opts) {
+  const o = opts || {};
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const cv = document.createElement('canvas');
+  cv.className = 'confetti-layer';
+  document.body.appendChild(cv);
+  const ctx = cv.getContext('2d');
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function size() {
+    cv.width  = Math.floor(window.innerWidth  * dpr);
+    cv.height = Math.floor(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  size();
+
+  const W = () => window.innerWidth, H = () => window.innerHeight;
+  const colors = o.colors && o.colors.length
+    ? o.colors
+    : ['#4f46e5', '#f59e0b', '#38bdf8', '#22c55e', '#ef4444', '#a855f7', '#fbbf24'];
+
+  const N = o.count || 130;
+  const bits = [];
+  for (let i = 0; i < N; i++) {
+    bits.push({
+      x: W() * (0.5 + (Math.random() - 0.5) * 0.5),
+      y: H() * 0.34 + Math.random() * 40,
+      vx: (Math.random() - 0.5) * 11,
+      vy: -6 - Math.random() * 9,
+      w: 5 + Math.random() * 6,
+      h: 8 + Math.random() * 8,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.32,
+      c: colors[Math.floor(Math.random() * colors.length)],
+      life: 150 + Math.random() * 90
+    });
+  }
+
+  let frame = 0, raf;
+  function tick() {
+    frame++;
+    ctx.clearRect(0, 0, W(), H());
+    let alive = 0;
+    bits.forEach(b => {
+      if (b.life <= 0) return;
+      alive++;
+      b.life--;
+      b.vy += 0.32;                     // gravity
+      b.vx *= 0.99;                     // drag
+      b.x += b.vx;
+      b.y += b.vy;
+      b.rot += b.vr;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, b.life / 55));
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.rot);
+      ctx.fillStyle = b.c;
+      ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      ctx.restore();
+    });
+    if (alive && frame < 400) raf = requestAnimationFrame(tick);
+    else { cancelAnimationFrame(raf); cv.remove(); window.removeEventListener('resize', size); }
+  }
+  window.addEventListener('resize', size);
+  tick();
+}
+
+/* =========================================================
+   TOOL ICONS — the real brand marks.
+
+   Six come from Simple Icons, which publishes brand SVGs under
+   CC0, so they are the actual logos and are free to embed. Simple
+   Icons has no mark for GoHighLevel or Lovable, so those two are
+   simple shapes drawn to suit (growth bars / a heart) rather than
+   fake logos — flagged with `real: false`.
+
+   Paths are inlined instead of loaded from a CDN so the site keeps
+   working with no external dependency.
+   ========================================================= */
+const TOOL_ICON = {
+  hubspot: { real: true, d: 'M18.164 7.93V5.084a2.198 2.198 0 001.267-1.978v-.067A2.2 2.2 0 0017.238.845h-.067a2.2 2.2 0 00-2.193 2.193v.067a2.196 2.196 0 001.252 1.973l.013.006v2.852a6.22 6.22 0 00-2.969 1.31l.012-.01-7.828-6.095A2.497 2.497 0 104.3 4.656l-.012.006 7.697 5.991a6.176 6.176 0 00-1.038 3.446c0 1.343.425 2.588 1.147 3.607l-.013-.02-2.342 2.343a1.968 1.968 0 00-.58-.095h-.002a2.033 2.033 0 102.033 2.033 1.978 1.978 0 00-.1-.595l.005.014 2.317-2.317a6.247 6.247 0 104.782-11.134l-.036-.005zm-.964 9.378a3.206 3.206 0 113.215-3.207v.002a3.206 3.206 0 01-3.207 3.207z' },
+  ghl:     { real: false, d: 'M3.5 13.5h4v7h-4zM10 8.5h4v12h-4zM16.5 3.5h4v17h-4z' },
+  airtable:{ real: true, d: 'M11.992 1.966c-.434 0-.87.086-1.28.257L1.779 5.917c-.503.208-.49.908.012 1.116l8.982 3.558a3.266 3.266 0 0 0 2.454 0l8.982-3.558c.503-.196.503-.908.012-1.116l-8.957-3.694a3.255 3.255 0 0 0-1.272-.257zM23.4 8.056a.589.589 0 0 0-.222.045l-10.012 3.877a.612.612 0 0 0-.38.564v8.896a.6.6 0 0 0 .821.552L23.62 18.1a.583.583 0 0 0 .38-.551V8.653a.6.6 0 0 0-.6-.596zM.676 8.095a.644.644 0 0 0-.48.19C.086 8.396 0 8.53 0 8.69v8.355c0 .442.515.737.908.54l6.27-3.006.307-.147 2.969-1.436c.466-.22.43-.908-.061-1.092L.883 8.138a.57.57 0 0 0-.207-.044z' },
+  zapier:  { real: true, d: 'M4.157 0A4.151 4.151 0 0 0 0 4.161v15.678A4.151 4.151 0 0 0 4.157 24h15.682A4.152 4.152 0 0 0 24 19.839V4.161A4.152 4.152 0 0 0 19.839 0H4.157Zm10.61 8.761h.03a.577.577 0 0 1 .23.038.585.585 0 0 1 .201.124.63.63 0 0 1 .162.431.612.612 0 0 1-.162.435.58.58 0 0 1-.201.128.58.58 0 0 1-.23.042.529.529 0 0 1-.235-.042.585.585 0 0 1-.332-.328.559.559 0 0 1-.038-.235.613.613 0 0 1 .17-.431.59.59 0 0 1 .405-.162Zm2.853 1.572c.03.004.061.004.095.004.325-.011.646.064.937.219.238.144.431.355.552.609.128.279.189.582.185.888v.193a2 2 0 0 1 0 .219h-2.498c.003.227.075.45.204.642a.78.78 0 0 0 .646.265.714.714 0 0 0 .484-.136.642.642 0 0 0 .23-.318l.915.257a1.398 1.398 0 0 1-.28.537c-.14.159-.321.284-.521.355a2.234 2.234 0 0 1-.836.136 1.923 1.923 0 0 1-1.001-.245 1.618 1.618 0 0 1-.665-.703 2.221 2.221 0 0 1-.227-1.036 1.95 1.95 0 0 1 .48-1.398 1.9 1.9 0 0 1 1.3-.488Zm-9.607.023c.162.004.325.026.48.079.207.065.4.174.563.314.26.302.393.692.366 1.088v2.276H8.53l-.109-.711h-.065c-.064.163-.155.31-.272.439a1.122 1.122 0 0 1-.374.264 1.023 1.023 0 0 1-.453.083 1.334 1.334 0 0 1-.866-.264.965.965 0 0 1-.329-.801.993.993 0 0 1 .076-.431 1.02 1.02 0 0 1 .242-.363 1.478 1.478 0 0 1 1.043-.303h.952v-.181a.696.696 0 0 0-.136-.454.553.553 0 0 0-.438-.154.695.695 0 0 0-.378.086.48.48 0 0 0-.193.254l-.99-.144a1.26 1.26 0 0 1 .257-.563c.14-.174.321-.302.533-.378.261-.091.54-.136.82-.129.053-.003.106-.007.163-.007Zm4.384.007c.174 0 .347.038.506.114.182.083.34.211.458.374.257.423.377.911.351 1.406a2.53 2.53 0 0 1-.355 1.448 1.148 1.148 0 0 1-1.009.517c-.204 0-.401-.045-.582-.136a1.052 1.052 0 0 1-.48-.457 1.298 1.298 0 0 1-.114-.234h-.045l.004 1.784h-1.059v-4.713h.904l.117.805h.057c.068-.208.177-.401.328-.56a1.129 1.129 0 0 1 .843-.344h.076v-.004Zm7.559.084h.903l.113.805h.053a1.37 1.37 0 0 1 .235-.484.813.813 0 0 1 .313-.242.82.82 0 0 1 .39-.076h.234v1.051h-.401a.662.662 0 0 0-.313.008.623.623 0 0 0-.272.155.663.663 0 0 0-.174.26.683.683 0 0 0-.027.314v1.875h-1.054v-3.666Zm-17.515.003h3.262v.896L3.73 13.104l.034.113h1.973l.042.9H2.4v-.9l1.931-1.754-.045-.117H2.441v-.896Zm11.815 0h1.055v3.659h-1.055V10.45Zm3.443.684.019.016a.69.69 0 0 0-.351.045.756.756 0 0 0-.287.204c-.11.155-.174.336-.189.522h1.545c-.034-.526-.257-.787-.74-.787h.003Zm-5.718.163c-.026 0-.057 0-.083.004a.78.78 0 0 0-.31.053.746.746 0 0 0-.257.189 1.016 1.016 0 0 0-.204.695v.064c-.015.257.057.507.204.711a.634.634 0 0 0 .253.196.638.638 0 0 0 .314.061.644.644 0 0 0 .578-.265c.14-.223.204-.48.189-.74a1.216 1.216 0 0 0-.181-.711.677.677 0 0 0-.503-.257Zm-4.509 1.266a.464.464 0 0 0-.268.102.373.373 0 0 0-.114.276c0 .053.008.106.027.155a.375.375 0 0 0 .087.132.576.576 0 0 0 .397.11v.004a.863.863 0 0 0 .563-.182.573.573 0 0 0 .211-.457v-.14h-.903Z' },
+  make:    { real: true, d: 'M13.38 3.498c-.27 0-.511.19-.566.465L9.85 18.986a.578.578 0 0 0 .453.678l4.095.826a.58.58 0 0 0 .682-.455l2.963-15.021a.578.578 0 0 0-.453-.678l-4.096-.826a.589.589 0 0 0-.113-.012zm-5.876.098a.576.576 0 0 0-.516.318L.062 17.697a.575.575 0 0 0 .256.774l3.733 1.877a.578.578 0 0 0 .775-.258l6.926-13.781a.577.577 0 0 0-.256-.776L7.762 3.658a.571.571 0 0 0-.258-.062zm11.74.115a.576.576 0 0 0-.576.576v15.426c0 .318.258.578.576.578h4.178a.58.58 0 0 0 .578-.578V4.287a.578.578 0 0 0-.578-.576Z' },
+  ai:      { real: true, d: 'm4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z' },
+  n8n:     { real: true, d: 'M21.4737 5.6842c-1.1772 0-2.1663.8051-2.4468 1.8947h-2.8955c-1.235 0-2.289.893-2.492 2.111l-.1038.623a1.263 1.263 0 0 1-1.246 1.0555H11.289c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947s-2.1663.8051-2.4467 1.8947H4.973c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947C1.1311 9.4737 0 10.6047 0 12s1.131 2.5263 2.5263 2.5263c1.1772 0 2.1663-.8051 2.4468-1.8947h1.4223c.2804 1.0896 1.2696 1.8947 2.4467 1.8947 1.1772 0 2.1663-.8051 2.4468-1.8947h1.0008a1.263 1.263 0 0 1 1.2459 1.0555l.1038.623c.203 1.218 1.257 2.111 2.492 2.111h.3692c.2804 1.0895 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263c-1.1772 0-2.1664.805-2.4468 1.8947h-.3692a1.263 1.263 0 0 1-1.246-1.0555l-.1037-.623A2.52 2.52 0 0 0 13.9607 12a2.52 2.52 0 0 0 .821-1.4794l.1038-.623a1.263 1.263 0 0 1 1.2459-1.0555h2.8955c.2805 1.0896 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263m0 1.2632a1.263 1.263 0 0 1 1.2631 1.2631 1.263 1.263 0 0 1-1.2631 1.2632 1.263 1.263 0 0 1-1.2632-1.2632 1.263 1.263 0 0 1 1.2632-1.2631M2.5263 10.7368A1.263 1.263 0 0 1 3.7895 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 1.2632 12a1.263 1.263 0 0 1 1.2631-1.2632m6.3158 0A1.263 1.263 0 0 1 10.1053 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 7.579 12a1.263 1.263 0 0 1 1.2632-1.2632m10.1053 3.7895a1.263 1.263 0 0 1 1.2631 1.2632 1.263 1.263 0 0 1-1.2631 1.2631 1.263 1.263 0 0 1-1.2632-1.2631 1.263 1.263 0 0 1 1.2632-1.2632' },
+  lovable: { real: false, d: 'M12 21.1s-7.6-4.8-9.6-9.3C1.1 8.5 2.9 5.3 6.1 5.3c2 0 3.3 1.2 4 2.3.7-1.1 2-2.3 4-2.3 3.2 0 5 3.2 3.7 6.5-2 4.5-9.8 9.3-9.8 9.3z' }
+};
+
+/* =========================================================
+   CERTIFICATE CATS
+   A different cat on every certificate. These are drawn, not
+   stock photos: a public repo full of downloaded cat pictures
+   is a licensing headache, and drawn cats can take each tool's
+   brand colour. Swap in real photos any time by pointing
+   catPortrait() at an <img> instead.
+   ========================================================= */
+const CAT_FUR = [
+  { name: 'ginger',   base: '#f0a35e', dark: '#c9773a', belly: '#fde3c4' },
+  { name: 'grey',     base: '#9aa4b0', dark: '#6b7683', belly: '#e3e8ee' },
+  { name: 'tuxedo',   base: '#3b3f46', dark: '#22262b', belly: '#f4f4f5' },
+  { name: 'cream',    base: '#e8d5b5', dark: '#c0a880', belly: '#fbf3e6' },
+  { name: 'siamese',  base: '#e6d9c8', dark: '#6b5344', belly: '#faf4ec' },
+  { name: 'calico',   base: '#f2c37b', dark: '#8a5a3b', belly: '#fff6e8' },
+  { name: 'black',    base: '#4a4550', dark: '#2c2932', belly: '#6b6575' },
+  { name: 'blue',     base: '#8fa8bf', dark: '#5f7a91', belly: '#dce7f0' },
+  { name: 'tabby',    base: '#c99a63', dark: '#8a663c', belly: '#f0dcc2' }
+];
+
+/** One cat portrait as inline SVG. `i` picks the fur, `eye` the colour. */
+function catPortrait(i, eyeColor) {
+  const f = CAT_FUR[i % CAT_FUR.length];
+  const stripes = (i % 3 === 0);
+  const wink    = (i % 4 === 2);
+  return `
+  <svg viewBox="0 0 100 100" class="catpic-svg" aria-hidden="true">
+    <rect width="100" height="100" fill="${f.belly}" opacity=".35"/>
+    <!-- ears -->
+    <path d="M22 40 L26 15 L44 30 Z" fill="${f.base}"/>
+    <path d="M78 40 L74 15 L56 30 Z" fill="${f.base}"/>
+    <path d="M27 37 L29.5 22 L40 31 Z" fill="#f6b8c4"/>
+    <path d="M73 37 L70.5 22 L60 31 Z" fill="#f6b8c4"/>
+    <!-- head -->
+    <ellipse cx="50" cy="56" rx="30" ry="27" fill="${f.base}"/>
+    <ellipse cx="50" cy="64" rx="19" ry="16" fill="${f.belly}"/>
+    ${stripes ? `
+      <path d="M38 33 q4 7 2 13" stroke="${f.dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M50 30 q0 8 0 13" stroke="${f.dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M62 33 q-4 7 -2 13" stroke="${f.dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>` : ''}
+    <!-- eyes -->
+    ${wink
+      ? `<path d="M34 53 q5 -4 10 0" stroke="#2b2b2b" stroke-width="3" fill="none" stroke-linecap="round"/>
+         <ellipse cx="61" cy="53" rx="5.5" ry="6.5" fill="#fff"/>
+         <ellipse cx="61" cy="53.5" rx="3" ry="4.5" fill="${eyeColor || '#3a3a3a'}"/>
+         <circle cx="62.3" cy="51.4" r="1.2" fill="#fff"/>`
+      : `<ellipse cx="39" cy="53" rx="5.5" ry="6.5" fill="#fff"/>
+         <ellipse cx="61" cy="53" rx="5.5" ry="6.5" fill="#fff"/>
+         <ellipse cx="39" cy="53.5" rx="3" ry="4.5" fill="${eyeColor || '#3a3a3a'}"/>
+         <ellipse cx="61" cy="53.5" rx="3" ry="4.5" fill="${eyeColor || '#3a3a3a'}"/>
+         <circle cx="40.3" cy="51.4" r="1.2" fill="#fff"/>
+         <circle cx="62.3" cy="51.4" r="1.2" fill="#fff"/>`}
+    <!-- nose + mouth -->
+    <path d="M47 62 L53 62 L50 66 Z" fill="#e98a9c"/>
+    <path d="M50 66 q-4 5 -8 2" stroke="${f.dark}" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M50 66 q4 5 8 2" stroke="${f.dark}" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- whiskers -->
+    <g stroke="${f.dark}" stroke-width="1.6" stroke-linecap="round" opacity=".8">
+      <path d="M20 60 L36 62"/><path d="M20 67 L36 66"/>
+      <path d="M80 60 L64 62"/><path d="M80 67 L64 66"/>
+    </g>
+  </svg>`;
+}
+
+/** Inline SVG for a tool's icon. `size` is in px. */
+function toolIcon(trackId, size) {
+  const i = TOOL_ICON[trackId];
+  if (!i) return '';
+  const s = size || 24;
+  return `<svg class="ticon" viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path d="${i.d}"/></svg>`;
+}
+
 // Re-point each track's accent colour at its real brand colour.
 TRACKS.forEach(t => {
   const b = BRAND[t.id];
@@ -544,7 +712,7 @@ const defaultState = () => ({
   onboarded: false,
   musicOn: true,       // lofi player
   musicVol: 35,
-  musicId: 'jfKfPfyJRdk',
+  musicId: 'CFGLoQIhmow',
   aboutVol: 45,        // About-panel theme song
   aboutMuted: false,
   utilHidden: false,
@@ -718,6 +886,17 @@ function overallProgress() {
 }
 const completedTracks = () => TRACKS.filter(t => trackProgress(t).pct === 100);
 
+/** Progress bars shade from amber through to green as you fill them,
+ *  so the colour tells you roughly how far along a track is at a glance.
+ *  Nothing done at all stays grey. */
+function progressTone(pct) {
+  if (pct <= 0)   return "p0";     // grey  - not started
+  if (pct < 34)   return "p1";     // amber - just begun
+  if (pct < 67)   return "p2";     // lime  - halfway
+  if (pct < 100)  return "p3";     // green - nearly there
+  return "p4";                     // deep green - complete
+}
+
 /* ---------------------------------------------------------
    SEQUENTIAL UNLOCKING
    Week 1 is always open. Every later week unlocks only when
@@ -834,7 +1013,7 @@ function renderTrackNav() {
             : p.pct === 100 ? '<span class="tnav-check">✓</span>'
             : `<span class="tnav-pct">${p.pct}%</span>`}
         </span>
-        <span class="tnav-bar"><span class="tnav-fill" style="width:${p.pct}%"></span></span>
+        <span class="tnav-bar"><span class="tnav-fill ${progressTone(p.pct)}" style="width:${p.pct}%"></span></span>
       </button>`;
   }).join('');
   syncTracksDrop();
@@ -859,7 +1038,7 @@ function renderTrackGrid() {
           </span>
         </span>
         <span class="tcard-tag" style="display:block">${escapeHtml(t.tagline)}</span>
-        <span class="tcard-bar" style="display:block"><span class="tcard-fill" style="width:${p.pct}%"></span></span>
+        <span class="tcard-bar" style="display:block"><span class="tcard-fill ${progressTone(p.pct)}" style="width:${p.pct}%"></span></span>
         <span class="tcard-meta">
           ${open
             ? `<span>${p.done} / ${p.total} tasks</span>
@@ -1265,7 +1444,7 @@ function renderBadges() {
     return `
       <div class="badge ${unlocked ? 'unlocked' : 'locked'}" ${unlocked ? `data-badge="${t.id}" role="button" tabindex="0"` : ''}
            style="--tc:${t.color};--tc-soft:${t.colorSoft}">
-        <div class="badge-medal">${unlocked ? t.icon : '🔒'}</div>
+        <div class="badge-medal">${unlocked ? toolIcon(t.id, 26) : '🔒'}</div>
         <div class="badge-name">${escapeHtml(t.name)}</div>
         <div class="badge-status">${unlocked ? 'Certified' : `${p.done}/${p.total} tasks`}</div>
         ${unlocked ? '<div class="badge-cta">View certificate →</div>' : ''}
@@ -1285,37 +1464,72 @@ function renderBadges() {
 }
 
 function renderCertificate() {
-  el.certTools.innerHTML = TRACKS.map(t => `<li>${escapeHtml(t.name)}</li>`).join('');
+  el.certTools.innerHTML = TRACKS.map(t =>
+    `<li style="--tc:${t.color}">${toolIcon(t.id, 15)}<span>${escapeHtml(t.name)}</span></li>`
+  ).join('');
   el.certNameOut.textContent = state.name || 'Your Name';
   el.certName.value = state.name || '';
   el.certDate.textContent = fmtLong(new Date());
+  // the master certificate gets the 9th cat, so it differs from all eight tracks
+  const cat = $('#certCat');
+  if (cat) cat.innerHTML = catPortrait(8, '#4f46e5');
 }
 
 function openBadgeCert(trackId) {
   const t = TRACKS.find(x => x.id === trackId);
   if (!t) return;
   const weeks = t.modules.map(m => `Week ${m.week}: ${m.title}`);
+  const b = BRAND[t.id];
   el.badgeCert.innerHTML = `
-    <div class="cert-inner" style="border-color:${t.color}">
-      <div class="cert-seal" style="background:${t.color}">${t.icon}</div>
-      <p class="cert-kicker">Track Completed</p>
-      <h3 class="cert-title">${escapeHtml(t.name)}</h3>
-      <p class="cert-sub">${escapeHtml(t.weeksLabel)} · ${trackProgress(t).total} daily tasks</p>
-      <p class="cert-awarded">Awarded to</p>
-      <p class="cert-name">${escapeHtml(state.name || 'Your Name')}</p>
-      <p class="cert-body">for completing every module in this track, covering:</p>
-      <ul class="cert-tools">${weeks.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
-      <div class="cert-foot">
-        <div class="cert-foot-col">
-          <div class="cert-line"></div>
-          <div class="cert-foot-label">Date</div>
-          <div class="cert-foot-value">${fmtLong(new Date())}</div>
+    <div class="cert-frame" style="--tc:${t.color};--tc-ink:${b ? b.ink : t.color}">
+      <div class="cert-inner">
+
+        <div class="cert-paws" aria-hidden="true">
+          <svg viewBox="0 0 120 120"><use href="#pawset"/></svg>
         </div>
-        <div class="cert-foot-col">
-          <div class="cert-line"></div>
-          <div class="cert-foot-label">Program</div>
-          <div class="cert-foot-value">AI Automation Specialist Roadmap</div>
+
+        <div class="cert-brand"><span class="cert-brand-text">Visual Studio Joe</span></div>
+
+        <div class="cert-cat">${catPortrait(TRACKS.indexOf(t), t.color)}</div>
+        <div class="cert-toolmark" style="background:${t.color}">${toolIcon(t.id, 30)}</div>
+
+        <p class="cert-kicker">Certificate of Completion</p>
+        <div class="cert-rule" aria-hidden="true"><span></span><i>❋</i><span></span></div>
+        <h3 class="cert-title">${escapeHtml(t.name)}</h3>
+        <p class="cert-sub">${escapeHtml(t.weeksLabel)} · ${trackProgress(t).total} daily tasks</p>
+
+        <p class="cert-awarded">This certifies that</p>
+        <p class="cert-name">${escapeHtml(state.name || 'Your Name')}</p>
+        <div class="cert-nameline" aria-hidden="true"></div>
+
+        <p class="cert-body">has completed every module in this track, covering:</p>
+        <ul class="cert-tools cert-weeks">${weeks.map(w => `<li><span>${escapeHtml(w)}</span></li>`).join('')}</ul>
+
+        <div class="cert-foot">
+          <div class="cert-foot-col">
+            <div class="cert-foot-top">${fmtLong(new Date())}</div>
+            <div class="cert-line"></div>
+            <div class="cert-foot-label">Date of completion</div>
+          </div>
+          <div class="cert-seal-wrap" aria-hidden="true">
+            <div class="cert-seal" style="border-color:${t.color};color:${t.color}">
+              <svg viewBox="0 0 24 24"><use href="#paw"/></svg>
+              <span>CERTIFIED</span>
+            </div>
+          </div>
+          <div class="cert-foot-col">
+            <div class="cert-foot-top cert-sig">Joemark Basa</div>
+            <div class="cert-line"></div>
+            <div class="cert-foot-label">App developer</div>
+          </div>
         </div>
+
+        <p class="cert-disclaimer">
+          For fun, not for hiring. This is a personal-project completion record from an
+          independently built roadmap — not an accredited qualification, and it carries no formal
+          recognition. It simply says you finished this course. ${escapeHtml(t.name)}'s own official
+          certification, if it has one, comes from ${escapeHtml(t.name)} themselves.
+        </p>
       </div>
     </div>`;
   const pngBtn = $('#pngBadgeBtn');
@@ -1373,16 +1587,22 @@ function toggleTask(id, value) {
   if (wasTrack) {
     const after = trackProgress(wasTrack).pct;
     if (before < 100 && after === 100) {
-      toast(`🎉 ${wasTrack.name} track complete — badge unlocked`);
+      // celebrate in that tool's own brand colours
+      const b = BRAND[wasTrack.id];
+      confetti({ count: 140, colors: [wasTrack.color, b ? b.ink : '#4f46e5', '#fbbf24', '#ffffff', '#22c55e'] });
+      try { Sfx.level(); } catch (_) {}
+      toast(`🎉 ${wasTrack.name} track complete — certificate unlocked`);
     }
   }
   if (beforeAll < 100 && overallProgress().pct === 100) {
+    setTimeout(() => confetti({ count: 260 }), 250);   // a bigger one for the lot
     setTimeout(() => {
       setView('certificates');
       renderCertificate();
       openModal(el.certModal);
+      confetti({ count: 200 });
       toast('🏆 All 8 tracks complete — Master Certificate unlocked');
-    }, 500);
+    }, 700);
   }
 }
 
@@ -1765,10 +1985,48 @@ const Sfx = (() => {
                100 pts → two fish at once
                500 pts → the fish swim away from you
    ========================================================= */
-const DOG_AT = 20, DOUBLE_AT = 100, SWIM_AT = 500;
+/* Each dog keeps the SAME on-screen / off-screen rhythm no matter how
+   many there are — only the count and the speed climb with your score. */
 const DOG_SHOWS_FOR = 15000;               // 15s on screen
-const DOG_GAP = [9000, 22000];             // then hidden for 9–22s
-const MAX_LIVES = 3;
+const DOG_GAP = [9000, 22000];             // then away for 9–22s
+const START_LIVES = 3;                     // what you begin with
+const MAX_LIVES   = 5;                     // hearts can top you up to this
+const HEART_GAP   = [18000, 40000];        // a heart drops every 18–40s
+const HEART_LASTS = 12000;                 // and waits 12s before fading
+const SWIM_AT = 120;                       // fish start dodging you
+
+/* Difficulty ladder. `at` is the fish score the level starts at. */
+const LEVELS = [
+  { at:   0, dogs: 0, fish: 1, speed: 0.00, name: 'warm-up',      note: null },
+  { at:  15, dogs: 1, fish: 1, speed: 1.10, name: 'a dog!',       note: 'a dog has noticed you' },
+  { at:  30, dogs: 1, fish: 2, speed: 1.22, name: 'double fish',  note: 'double fish!' },
+  { at:  50, dogs: 2, fish: 2, speed: 1.34, name: 'two dogs',     note: 'there are TWO of them now' },
+  { at:  75, dogs: 2, fish: 3, speed: 1.46, name: 'triple fish',  note: 'three fish at once' },
+  { at: 105, dogs: 3, fish: 3, speed: 1.58, name: 'three dogs',   note: 'three dogs. good luck.' },
+  { at: 140, dogs: 3, fish: 4, speed: 1.70, name: 'four fish',    note: 'four fish. stay sharp.' },
+  { at: 180, dogs: 4, fish: 4, speed: 1.82, name: 'the pack',     note: 'a whole pack now' },
+  { at: 240, dogs: 5, fish: 5, speed: 1.94, name: 'swarm',        note: 'five dogs. FIVE.' },
+  { at: 320, dogs: 6, fish: 5, speed: 2.06, name: 'chaos',        note: 'this is chaos' },
+  { at: 420, dogs: 7, fish: 6, speed: 2.18, name: 'nightmare',    note: 'nightmare mode' },
+  { at: 550, dogs: 8, fish: 6, speed: 2.30, name: 'legend',       note: 'you are a legend' }
+];
+
+/** The level for a given score. */
+function levelFor(score) {
+  let lv = LEVELS[0];
+  for (const l of LEVELS) if (score >= l.at) lv = l;
+  return lv;
+}
+
+/* What the dogs say once they stop chasing you and settle down. */
+const DOG_LINES = [
+  'truce?', 'i was never really hungry', 'you smell like fish',
+  'nice grid you have here', 'i only chase for the cardio',
+  'do you also have snacks?', 'we are friends now, ok?',
+  'ten out of ten, would chase again', 'shhh, they are studying',
+  'i will allow one (1) fish', 'good study session, human',
+  'no hard feelings about earlier'
+];
 
 const CAT_LINES = [
   'one hour today. that is the whole trick.',
@@ -1829,9 +2087,14 @@ const Game = (() => {
 
   const cat  = { x: 130, y: 150, vx: 0, vy: 0, dir: 1, step: 0 };
   const keys = Object.create(null);
-  let fishes = [], dog = null, lives = MAX_LIVES, dead = false;
+  let fishes = [], lives = START_LIVES, dead = false;
+  let heart = null, heartNextAt = 0;          // the collectable extra life
   let active = false, raf = null, tick = 0, pop = 0, invulnUntil = 0;
-  let dogNextAt = 0, dogUntil = 0, spoke = 0;
+  let spoke = 0, shownLevel = 0;
+  /* One "slot" per dog the current level allows. A slot is either
+     holding a dog (until `until`) or empty and waiting (`nextAt`).
+     Every slot uses the same 15s-on / 9-22s-off rhythm. */
+  let slots = [];
   let bubble = null;                       // { text, until }
   const idle = { tx: null, ty: null, nextMove: 0, nextTalk: 0, giveUpAt: 0 };
 
@@ -1843,8 +2106,30 @@ const Game = (() => {
   function say(text, ms) {
     bubble = { text, until: now() + (ms || 2600) };
   }
-  function fishCount() { return score() >= DOUBLE_AT ? 2 : 1; }
+  const level = () => levelFor(score());
+  function fishCount() { return level().fish; }
   function fishSwims() { return score() >= SWIM_AT; }
+
+  /* ---------- dogs ---------- */
+  function newDog(t) {
+    const edge = Math.floor(rnd(0, 4));
+    return {
+      x: edge === 0 ? 10 : edge === 1 ? W - 10 : rnd(20, Math.max(22, W - 20)),
+      y: edge === 2 ? 14 : edge === 3 ? H - 14 : rnd(24, Math.max(26, H - 20)),
+      vx: 0, vy: 0, wander: 0,
+      tx: null, ty: null, restUntil: 0,        // used in companion mode
+      msg: null, msgUntil: 0, nextMsg: t + rnd(3000, 14000)
+    };
+  }
+
+  /** Keep the number of slots matching the level. */
+  function syncSlots(t) {
+    const want = level().dogs;
+    while (slots.length < want) slots.push({ dog: null, nextAt: t + rnd(1500, 6000), until: 0 });
+    while (slots.length > want) slots.pop();
+  }
+
+  const liveDogs = () => slots.filter(s => s.dog).map(s => s.dog);
 
   function newFish() {
     return { x: rnd(28, Math.max(30, W - 28)), y: rnd(28, Math.max(30, H - 28)),
@@ -1860,7 +2145,9 @@ const Game = (() => {
     if (el.gameScore) el.gameScore.textContent = score();
     if (el.gameBest)  el.gameBest.textContent  = state.fishBest || 0;
     if (el.gameLives) {
-      el.gameLives.textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(Math.max(0, MAX_LIVES - lives));
+      // only show empty slots up to what you have actually earned
+      const slotsShown = Math.max(START_LIVES, lives);
+      el.gameLives.textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(Math.max(0, slotsShown - lives));
       el.gameLives.classList.toggle('low', lives === 1);
     }
   }
@@ -1942,7 +2229,7 @@ const Game = (() => {
     ctx.fillRect(x + s * 7, y - bounce + s + sp, 2, 2);
   }
 
-  function drawDog(d) {
+  function drawDog(d, friendly) {
     const s = 4, dir = d.vx < 0 ? -1 : 1, x = d.x, y = d.y;
     const px = (a, b, w, h, c) => {
       ctx.fillStyle = c;
@@ -1955,11 +2242,20 @@ const Game = (() => {
     px(2, -4, 6, 6, body);                 // head
     px(2, -6, 2, 2, dark);                 // ear
     px(8, -1, 1, 2, dark);                 // snout
-    px(6, -3, 1, 1, '#fca5a5');            // eye (angry red)
+    px(6, -3, 1, 1, friendly ? '#1f2937' : '#fca5a5');   // calm vs angry eye
     px(-5, 5 - trot, 2, 1, dark);
     px(1, 5 - (1 - trot), 2, 1, dark);
-    // little rage puffs
-    if (tick % 40 < 12) {
+
+    if (friendly) {
+      // wagging tail and a little heart instead of rage
+      const wag = Math.sin(tick / 6) * 2;
+      px(-8, -3 + wag * 0.4, 1, 2, dark);
+      if (tick % 90 < 26) {
+        ctx.fillStyle = 'rgba(244,114,182,.75)';
+        ctx.fillRect(Math.round(x + 7 * s * dir), Math.round(y - 7 * s), 3, 3);
+        ctx.fillRect(Math.round(x + 8 * s * dir), Math.round(y - 8 * s), 2, 2);
+      }
+    } else if (tick % 40 < 12) {
       ctx.fillStyle = 'rgba(239,68,68,.5)';
       ctx.fillRect(Math.round(x + 10 * s * dir), Math.round(y - 6 * s), 3, 3);
     }
@@ -2021,14 +2317,14 @@ const Game = (() => {
   }
 
   /* ---------- lifecycle ---------- */
-  function loseLife() {
+  function loseLife(dog) {
     lives--;
     invulnUntil = now() + 1600;
     syncHud();
     if (lives <= 0) {
       Sfx.die();
       dead = true;
-      dog = null;
+      slots = [];
       state.fish = 0;
       saveState();
       syncHud();
@@ -2045,11 +2341,12 @@ const Game = (() => {
 
   function restart() {
     dead = false;
-    lives = MAX_LIVES;
+    lives = START_LIVES;
     cat.x = W / 2; cat.y = H / 2; cat.vx = cat.vy = 0;
     fishes = []; syncFish();
-    dog = null;
-    dogNextAt = score() >= DOG_AT ? now() + rnd(...DOG_GAP) : 0;
+    slots = [];                                    // rebuilt from the level
+    shownLevel = 0;
+    heart = null; heartNextAt = 0;
     invulnUntil = now() + 1200;
     Sfx.revive();
     say('let us go again!', 2200);
@@ -2066,15 +2363,88 @@ const Game = (() => {
     pop = 22;
 
     const after = state.fish;
-    if (before < DOG_AT && after >= DOG_AT) {
-      Sfx.level(); say('uh oh — a dog is coming', 3200);
-      dogNextAt = now() + rnd(2500, 5000);
-    } else if (before < DOUBLE_AT && after >= DOUBLE_AT) {
-      Sfx.level(); say('double fish unlocked!', 3200);
+
+    // crossed into a new level?
+    const lvBefore = levelFor(before), lvAfter = levelFor(after);
+    if (lvAfter.at !== lvBefore.at && lvAfter.note) {
+      Sfx.level();
+      say(lvAfter.note, 3400);
+      shownLevel = lvAfter.at;
     } else if (before < SWIM_AT && after >= SWIM_AT) {
-      Sfx.level(); say('the fish can swim now. good luck.', 3600);
+      Sfx.level();
+      say('the fish can swim now. good luck.', 3600);
     }
     syncFish();
+  }
+
+  /** A pulsing heart pickup that restores one life. */
+  function drawHeart(h, t) {
+    const beat = 1 + Math.sin(t / 180) * 0.09;
+    const fade = Math.min(1, (h.until - t) / 2200);       // fades as it expires
+    const s = 9 * beat;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0.15, Math.min(1, fade));
+    ctx.translate(h.x, h.y);
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(0, s * 0.75);
+    ctx.bezierCurveTo(-s * 1.5, -s * 0.25, -s * 0.6, -s * 1.25, 0, -s * 0.45);
+    ctx.bezierCurveTo(s * 0.6, -s * 1.25, s * 1.5, -s * 0.25, 0, s * 0.75);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.55)';              // little shine
+    ctx.fillRect(-s * 0.55, -s * 0.5, 2.5, 2.5);
+    ctx.restore();
+  }
+
+  /** Spawn / expire / collect the heart. Only while playing. */
+  function heartTick(t) {
+    if (!heartNextAt) { heartNextAt = t + rnd(...HEART_GAP); return; }
+
+    if (!heart && t >= heartNextAt) {
+      if (lives >= MAX_LIVES) {                            // already full, try later
+        heartNextAt = t + rnd(...HEART_GAP);
+      } else {
+        heart = { x: rnd(26, Math.max(28, W - 26)), y: rnd(30, Math.max(32, H - 26)), until: t + HEART_LASTS };
+      }
+    }
+    if (!heart) return;
+
+    if (t >= heart.until) {                                // missed it
+      heart = null;
+      heartNextAt = t + rnd(...HEART_GAP);
+      return;
+    }
+    drawHeart(heart, t);
+
+    if (Math.hypot(heart.x - cat.x, heart.y - cat.y) < 20) {
+      heart = null;
+      heartNextAt = t + rnd(...HEART_GAP);
+      if (lives < MAX_LIVES) {
+        lives++;
+        syncHud();
+        Sfx.revive();
+        say(lives >= MAX_LIVES ? 'full hearts!' : '+1 life', 2000);
+      }
+    }
+  }
+
+  /** Small speech bubble used by the dogs in companion mode. */
+  function drawMiniBubble(x, y, text) {
+    ctx.font = '9.5px Inter, system-ui, sans-serif';
+    const tw = Math.min(ctx.measureText(text).width, W - 26);
+    const bw = tw + 12, bh = 17;
+    let bx = Math.max(4, Math.min(W - bw - 4, x - bw / 2));
+    let by = Math.max(4, y - bh);
+    const ink = themeInk();
+    ctx.fillStyle = ink.panel;
+    ctx.strokeStyle = 'rgba(128,128,140,.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(bx, by, bw, bh, 6); else ctx.rect(bx, by, bw, bh);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = ink.ink;
+    ctx.textAlign = 'center';
+    ctx.fillText(text, bx + bw / 2, by + 12);
   }
 
   /* ---------- companion mode ----------
@@ -2179,48 +2549,69 @@ const Game = (() => {
     }
     }
 
-    /* dog schedule — never while you're studying */
-    if (active && score() >= DOG_AT) {
-      if (!dogNextAt && !dog) dogNextAt = t + rnd(...DOG_GAP);
-      if (!dog && dogNextAt && t >= dogNextAt) {
-        const edge = Math.floor(rnd(0, 4));
-        dog = {
-          x: edge === 0 ? 10 : edge === 1 ? W - 10 : rnd(20, W - 20),
-          y: edge === 2 ? 10 : edge === 3 ? H - 10 : rnd(20, H - 20),
-          vx: 0, vy: 0, wander: 0
-        };
-        dogUntil = t + DOG_SHOWS_FOR;
-        dogNextAt = 0;
-        Sfx.bark();
-        say('run!', 1500);
+    /* hearts — only while you are actually playing */
+    if (active) heartTick(t);
+
+    /* ---------- dogs ----------
+       The spawn / despawn rhythm runs in BOTH modes, so the dogs that
+       are around when you click away stay around, and ones that were
+       due to arrive still arrive. Only their behaviour changes. */
+    syncSlots(t);
+    slots.forEach(s => {
+      if (!s.dog && t >= s.nextAt) {
+        s.dog = newDog(t);
+        s.until = t + DOG_SHOWS_FOR;
+        if (active) { Sfx.bark(); say(slots.filter(x => x.dog).length > 1 ? 'another one!' : 'run!', 1500); }
       }
-      if (dog && t >= dogUntil) {
-        dog = null;
-        dogNextAt = t + rnd(...DOG_GAP);
+      if (s.dog && t >= s.until) {
+        s.dog = null;
+        s.nextAt = t + rnd(...DOG_GAP);
       }
-    }
+    });
 
-    /* dog behaviour — chases, but wanders while it does */
-    if (dog) {
-      dog.wander += rnd(-0.14, 0.14);
-      dog.wander = Math.max(-0.9, Math.min(0.9, dog.wander));
-      const ang = Math.atan2(cat.y - dog.y, cat.x - dog.x) + dog.wander;
-      const spd = 1.18;
-      dog.vx = Math.cos(ang) * spd;
-      dog.vy = Math.sin(ang) * spd;
-      dog.x = Math.max(14, Math.min(W - 14, dog.x + dog.vx));
-      dog.y = Math.max(20, Math.min(H - 16, dog.y + dog.vy));
-      drawDog(dog);
+    const spd = level().speed || 1.1;
+    slots.forEach(s => {
+      const d = s.dog;
+      if (!d) return;
 
-      if (t > invulnUntil && Math.hypot(dog.x - cat.x, dog.y - cat.y) < 21) loseLife();
+      if (active) {
+        /* hunting: head for the cat, but with a wobble so it curves */
+        d.wander += rnd(-0.14, 0.14);
+        d.wander = Math.max(-0.9, Math.min(0.9, d.wander));
+        const ang = Math.atan2(cat.y - d.y, cat.x - d.x) + d.wander;
+        d.vx = Math.cos(ang) * spd;
+        d.vy = Math.sin(ang) * spd;
+      } else {
+        /* friendly: potter about like the cat does, no chasing */
+        if (d.tx === null && t > d.restUntil) {
+          if (Math.random() < 0.75) {
+            d.tx = rnd(20, Math.max(22, W - 20));
+            d.ty = rnd(26, Math.max(28, H - 20));
+          } else d.restUntil = t + rnd(1500, 4000);
+        }
+        if (d.tx !== null) {
+          const dx = d.tx - d.x, dy = d.ty - d.y, dist = Math.hypot(dx, dy);
+          if (dist < 8) { d.tx = null; d.restUntil = t + rnd(1800, 5000); d.vx = d.vy = 0; }
+          else { d.vx = (dx / dist) * 0.55; d.vy = (dy / dist) * 0.55; }
+        } else { d.vx *= 0.85; d.vy *= 0.85; }
 
-      // countdown ring so you can see how long it sticks around
-      const left = Math.max(0, (dogUntil - t) / DOG_SHOWS_FOR);
-      ctx.strokeStyle = 'rgba(239,68,68,.55)'; ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(W - 14, 14, 6, -Math.PI / 2, -Math.PI / 2 + left * Math.PI * 2);
-      ctx.stroke();
-    }
+        // an occasional friendly remark
+        if (t > d.nextMsg) {
+          d.msg = DOG_LINES[Math.floor(Math.random() * DOG_LINES.length)];
+          d.msgUntil = t + 4200;
+          d.nextMsg = t + rnd(14000, 34000);
+        }
+      }
+
+      d.x = Math.max(14, Math.min(W - 14, d.x + d.vx));
+      d.y = Math.max(20, Math.min(H - 16, d.y + d.vy));
+      drawDog(d, !active);
+
+      if (active && t > invulnUntil && Math.hypot(d.x - cat.x, d.y - cat.y) < 21) loseLife(d);
+
+      if (!active && d.msg && t < d.msgUntil) drawMiniBubble(d.x, d.y - 22, d.msg);
+      else if (d.msg && t >= d.msgUntil) d.msg = null;
+    });
 
     /* +1 popper */
     if (pop > 0) {
@@ -2241,11 +2632,21 @@ const Game = (() => {
       else drawBubble(bubble.text);
     }
 
+    /* level name, top left */
+    const lv = level();
+    if (lv.at > 0) {
+      ctx.fillStyle = active ? 'rgba(239,68,68,.75)' : ink.txt;
+      ctx.font = 'bold 9.5px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('LV ' + (LEVELS.indexOf(lv) + 1), 8, 14);
+    }
+
     if (!active) {
       ctx.fillStyle = ink.txt;
       ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('paused · click to play', W / 2, H - 10);
+      const pals = liveDogs().length;
+      ctx.fillText(pals ? `paused · ${pals} friend${pals > 1 ? 's' : ''} visiting` : 'paused · click to play', W / 2, H - 10);
     }
 
     raf = requestAnimationFrame(frame);
@@ -2294,7 +2695,9 @@ const Game = (() => {
     active = true;
     idle.tx = idle.ty = null;
     invulnUntil = now() + 1500;                    // grace period on resume
-    dogNextAt = score() >= DOG_AT ? now() + rnd(4000, 9000) : 0;
+    // dogs that were hanging around go back to hunting, but you get a
+    // moment first and their leave-timers keep running unchanged
+    slots.forEach(s => { if (s.dog) { s.dog.tx = s.dog.ty = null; s.dog.msg = null; } });
     if (el.gameHint) el.gameHint.textContent = 'wasd / arrows';
     cv.classList.add('playing');
   });
@@ -2303,8 +2706,14 @@ const Game = (() => {
   cv.addEventListener('blur', () => {
     active = false;
     for (const k in keys) keys[k] = false;
-    dog = null;                                    // no dog while you study
-    dogNextAt = 0;
+    // Dogs STAY when you click away — they just stop hunting and turn
+    // friendly. Their arrive/leave timers carry on exactly as before.
+    slots.forEach(s => {
+      if (!s.dog) return;
+      s.dog.tx = s.dog.ty = null;
+      s.dog.restUntil = now() + rnd(300, 1500);
+      s.dog.nextMsg = now() + rnd(2500, 9000);
+    });
     cat.vx = cat.vy = 0;
     idle.tx = idle.ty = null;
     idle.nextMove = now() + rnd(700, 2000);
@@ -2345,10 +2754,11 @@ const Game = (() => {
     resetScore() {
       state.fish = 0;
       saveState();
-      lives = MAX_LIVES;
+      lives = START_LIVES;
       dead = false;
-      dog = null;
-      dogNextAt = 0;
+      slots = [];
+      shownLevel = 0;
+      heart = null; heartNextAt = 0;
       invulnUntil = 0;
       cat.x = W / 2; cat.y = H / 2; cat.vx = cat.vy = 0;
       fishes = []; syncFish();
@@ -2693,62 +3103,120 @@ function syncProfileLabel() {
 /* =========================================================
    CERTIFICATE EXPORT — PNG rendered on a canvas, plus email
    ========================================================= */
+/**
+ * Draw the certificate to a canvas for the PNG download.
+ *
+ * This deliberately mirrors the on-screen design one element at a time —
+ * same cream paper, double frame, paw watermark, cat portrait, tool mark,
+ * footer order and disclaimer — so the file you download matches what you
+ * are looking at. It is A4-landscape proportioned (1.414:1), which is also
+ * what the print stylesheet targets, so PNG and PDF agree.
+ */
 function certPNG(opts) {
-  const { title, subtitle, name, body, items, footRight } = opts;
+  const { title, subtitle, name, body, items, accent, ink, catIndex, iconPath } = opts;
   const S = 2;                                   // 2x for a crisp file
-  const W = 1400, H = 990;
+  const W = 1414, H = 1000;                      // A4 landscape ratio
   const c = document.createElement('canvas');
   c.width = W * S; c.height = H * S;
   const x = c.getContext('2d');
   x.scale(S, S);
 
-  x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
-  x.strokeStyle = '#4f46e5'; x.lineWidth = 6;  x.strokeRect(34, 34, W - 68, H - 68);
-  x.strokeStyle = '#d3d8e0'; x.lineWidth = 1.5; x.strokeRect(50, 50, W - 100, H - 100);
+  const AC   = accent || '#4f46e5';
+  const INK  = ink || '#33475b';
+  const PAPER = '#fdfcf8';
 
+  /* ---------- paper + ruling ---------- */
+  x.fillStyle = PAPER; x.fillRect(0, 0, W, H);
+  x.strokeStyle = 'rgba(0,0,0,.018)'; x.lineWidth = 1;
+  for (let ly = 40; ly < H - 40; ly += 22) {
+    x.beginPath(); x.moveTo(46, ly + .5); x.lineTo(W - 46, ly + .5); x.stroke();
+  }
+
+  /* ---------- double frame ---------- */
+  x.strokeStyle = AC;
+  x.lineWidth = 3; x.strokeRect(24, 24, W - 48, H - 48);
+  x.lineWidth = 3; x.strokeRect(33, 33, W - 66, H - 66);
+  x.strokeStyle = hexA(AC, .4); x.lineWidth = 1;
+  x.strokeRect(47, 47, W - 94, H - 94);
+
+  /* ---------- paw watermark, top left ---------- */
+  x.save();
+  x.globalAlpha = .12; x.fillStyle = '#2b2b2b';
+  x.translate(74, 84);
+  [[0, 0, 1.5, -18], [56, -10, 1.2, 12], [8, 56, 1.25, 8], [60, 48, 1.6, -10]].forEach(p => {
+    x.save();
+    x.translate(p[0], p[1]); x.rotate(p[3] * Math.PI / 180); x.scale(p[2], p[2]);
+    paw(x);
+    x.restore();
+  });
+  x.restore();
+
+  /* ---------- cat portrait, top right ---------- */
+  drawCatBox(x, W - 168, 74, 108, catIndex, AC);
+
+  /* ---------- brand ---------- */
   x.textAlign = 'center';
+  x.fillStyle = INK; x.font = '800 17px Inter, sans-serif';
+  x.fillText('Visual Studio Joe', W / 2, 100);
 
-  // seal
-  x.fillStyle = '#4f46e5';
-  x.beginPath(); x.arc(W / 2, 138, 34, 0, Math.PI * 2); x.fill();
-  x.fillStyle = '#fff'; x.font = 'bold 30px Inter, sans-serif';
-  x.fillText('⚡', W / 2, 149);
+  /* ---------- tool mark ---------- */
+  if (iconPath) {
+    x.save();
+    x.fillStyle = AC;
+    x.beginPath(); x.arc(W / 2, 154, 33, 0, Math.PI * 2); x.fill();
+    x.translate(W / 2 - 17, 154 - 17);
+    x.scale(34 / 24, 34 / 24);
+    x.fillStyle = '#fff';
+    x.fill(new Path2D(iconPath));
+    x.restore();
+  }
 
-  x.fillStyle = '#8b94a3'; x.font = 'bold 15px Inter, sans-serif';
-  x.fillText('CERTIFICATE OF COMPLETION'.split('').join(' '), W / 2, 214);
+  /* ---------- kicker + rule ---------- */
+  const topY = iconPath ? 216 : 168;
+  x.fillStyle = INK; x.font = 'bold 15px Inter, sans-serif';
+  x.fillText('C E R T I F I C A T E   O F   C O M P L E T I O N', W / 2, topY);
 
-  x.fillStyle = '#111827'; x.font = 'bold 62px Georgia, serif';
-  x.fillText(title, W / 2, 288);
+  x.strokeStyle = hexA(AC, .5); x.lineWidth = 1;
+  x.beginPath(); x.moveTo(W / 2 - 220, topY + 18); x.lineTo(W / 2 - 20, topY + 18); x.stroke();
+  x.beginPath(); x.moveTo(W / 2 + 20, topY + 18); x.lineTo(W / 2 + 220, topY + 18); x.stroke();
+  x.fillStyle = AC; x.font = '14px Georgia, serif';
+  x.fillText('❋', W / 2, topY + 23);
 
-  x.fillStyle = '#8b94a3'; x.font = '17px Inter, sans-serif';
-  x.fillText(subtitle, W / 2, 324);
+  /* ---------- title ---------- */
+  x.fillStyle = '#1b1b1b'; x.font = 'bold 54px Georgia, serif';
+  x.fillText(title, W / 2, topY + 76);
 
-  x.fillStyle = '#4b5563'; x.font = '17px Inter, sans-serif';
-  x.fillText('This certifies that', W / 2, 402);
+  x.fillStyle = '#6b6b6b'; x.font = '15px Inter, sans-serif';
+  x.fillText(subtitle, W / 2, topY + 104);
 
-  x.fillStyle = '#111827'; x.font = 'bold 52px Georgia, serif';
-  x.fillText(name, W / 2, 466);
-  x.strokeStyle = '#d3d8e0'; x.lineWidth = 1;
-  x.beginPath(); x.moveTo(W / 2 - 330, 492); x.lineTo(W / 2 + 330, 492); x.stroke();
+  /* ---------- name ---------- */
+  x.fillStyle = '#6b6b6b'; x.font = 'italic 16px Inter, sans-serif';
+  x.fillText('This certifies that', W / 2, topY + 148);
 
-  // wrapped body copy
-  x.fillStyle = '#4b5563'; x.font = '17px Inter, sans-serif';
-  let line = '', y = 540;
+  x.fillStyle = INK; x.font = 'bold 46px Georgia, serif';
+  x.fillText(name, W / 2, topY + 200);
+  x.strokeStyle = '#b9b9b9'; x.lineWidth = 1;
+  x.beginPath(); x.moveTo(W / 2 - 300, topY + 218); x.lineTo(W / 2 + 300, topY + 218); x.stroke();
+
+  /* ---------- body copy ---------- */
+  x.fillStyle = '#4a4a4a'; x.font = '15px Inter, sans-serif';
+  let line = '', y = topY + 256;
   body.split(' ').forEach(word => {
     const test = line ? line + ' ' + word : word;
-    if (x.measureText(test).width > 820) { x.fillText(line, W / 2, y); y += 27; line = word; }
+    if (x.measureText(test).width > 800) { x.fillText(line, W / 2, y); y += 24; line = word; }
     else line = test;
   });
-  if (line) x.fillText(line, W / 2, y);
+  if (line) { x.fillText(line, W / 2, y); }
 
-  // pills
-  y += 52;
-  x.font = 'bold 15px Inter, sans-serif';
-  const pads = 17, gap = 11, rows = [];
+  /* ---------- pills ---------- */
+  y += 40;
+  x.font = '600 13px Inter, sans-serif';
+  const padX = 14, gap = 9, maxRow = 980;
+  const rows = [];
   let row = [], rowW = 0;
   items.forEach(t => {
-    const w = x.measureText(t).width + pads * 2;
-    if (rowW + w + gap > 1060 && row.length) { rows.push({ row, rowW }); row = []; rowW = 0; }
+    const w = x.measureText(t).width + padX * 2;
+    if (rowW + w + gap > maxRow && row.length) { rows.push({ row, rowW }); row = []; rowW = 0; }
     row.push({ t, w }); rowW += w + gap;
   });
   if (row.length) rows.push({ row, rowW });
@@ -2756,30 +3224,142 @@ function certPNG(opts) {
   rows.forEach(({ row: r, rowW: rw }) => {
     let cx = W / 2 - (rw - gap) / 2;
     r.forEach(({ t, w }) => {
-      x.fillStyle = '#eef2ff';
+      x.fillStyle = '#ffffff';
+      x.strokeStyle = '#e2ded2'; x.lineWidth = 1;
       x.beginPath();
-      if (x.roundRect) x.roundRect(cx, y - 20, w, 32, 16); else x.rect(cx, y - 20, w, 32);
-      x.fill();
-      x.fillStyle = '#4338ca'; x.textAlign = 'center';
-      x.fillText(t, cx + w / 2, y + 1);
+      if (x.roundRect) x.roundRect(cx, y - 15, w, 26, 13); else x.rect(cx, y - 15, w, 26);
+      x.fill(); x.stroke();
+      x.fillStyle = '#333'; x.textAlign = 'center';
+      x.fillText(t, cx + w / 2, y + 3);
       cx += w + gap;
     });
-    y += 44;
+    y += 34;
   });
 
-  // footer
-  const fy = H - 116;
-  x.strokeStyle = '#d3d8e0'; x.lineWidth = 1;
-  x.beginPath(); x.moveTo(240, fy); x.lineTo(600, fy); x.stroke();
-  x.beginPath(); x.moveTo(W - 600, fy); x.lineTo(W - 240, fy); x.stroke();
-  x.fillStyle = '#8b94a3'; x.font = 'bold 12px Inter, sans-serif';
-  x.fillText('D A T E   O F   C O M P L E T I O N', 420, fy + 26);
-  x.fillText('P R O G R A M', W - 420, fy + 26);
-  x.fillStyle = '#111827'; x.font = 'bold 16px Inter, sans-serif';
-  x.fillText(fmtLong(new Date()), 420, fy + 50);
-  x.fillText(footRight, W - 420, fy + 50);
+  /* ---------- footer: value ABOVE the line, label under it ---------- */
+  const fy = H - 132;
+  const colL = 330, colR = W - 330;
+
+  x.fillStyle = '#2b2b2b'; x.font = '600 15px Inter, sans-serif';
+  x.fillText(fmtLong(new Date()), colL, fy - 8);
+  x.font = 'bold 22px Georgia, serif';
+  x.fillText('Joemark Basa', colR, fy - 8);
+
+  x.strokeStyle = '#b9b9b9'; x.lineWidth = 1;
+  x.beginPath(); x.moveTo(colL - 150, fy); x.lineTo(colL + 150, fy); x.stroke();
+  x.beginPath(); x.moveTo(colR - 150, fy); x.lineTo(colR + 150, fy); x.stroke();
+
+  x.fillStyle = '#8a8a8a'; x.font = 'bold 10px Inter, sans-serif';
+  x.fillText('D A T E   O F   C O M P L E T I O N', colL, fy + 18);
+  x.fillText('A P P   D E V E L O P E R', colR, fy + 18);
+
+  /* ---------- seal ---------- */
+  x.save();
+  x.strokeStyle = AC; x.lineWidth = 2; x.setLineDash([5, 4]);
+  x.beginPath(); x.arc(W / 2, fy - 8, 36, 0, Math.PI * 2); x.stroke();
+  x.setLineDash([]);
+  x.fillStyle = AC;
+  x.translate(W / 2 - 11, fy - 26); x.scale(22 / 24, 22 / 24);
+  paw(x);
+  x.restore();
+  x.fillStyle = AC; x.font = 'bold 8px Inter, sans-serif';
+  x.fillText('C E R T I F I E D', W / 2, fy + 16);
+
+  /* ---------- disclaimer ---------- */
+  x.strokeStyle = '#d8d4c8'; x.lineWidth = 1; x.setLineDash([2, 3]);
+  x.beginPath(); x.moveTo(W / 2 - 380, H - 82); x.lineTo(W / 2 + 380, H - 82); x.stroke();
+  x.setLineDash([]);
+
+  x.fillStyle = '#a9a9a9'; x.font = 'italic 11px Inter, sans-serif';
+  const disc = 'For fun, not for hiring. This is a personal-project completion record from an independently built roadmap — not an accredited qualification, and it carries no formal recognition. It simply says you finished this course.';
+  let dl = '', dy = H - 62;
+  disc.split(' ').forEach(word => {
+    const test = dl ? dl + ' ' + word : word;
+    if (x.measureText(test).width > 760) { x.fillText(dl, W / 2, dy); dy += 16; dl = word; }
+    else dl = test;
+  });
+  if (dl) x.fillText(dl, W / 2, dy);
 
   return c;
+}
+
+/** A paw, drawn at 24x24 from the current transform. */
+function paw(x) {
+  const e = (cx, cy, rx, ry) => { x.beginPath(); x.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); x.fill(); };
+  e(12, 15, 4.6, 4);
+  e(6.6, 9.4, 2.1, 2.7);
+  e(10.3, 6.8, 2.1, 2.9);
+  e(14.2, 6.9, 2.1, 2.9);
+  e(17.6, 9.6, 2.1, 2.7);
+}
+
+/** The framed cat portrait, drawn to match catPortrait()'s SVG. */
+function drawCatBox(x, cx, cy, size, i, eyeColor) {
+  const f = CAT_FUR[(i || 0) % CAT_FUR.length];
+  const half = size / 2;
+
+  // white photo border
+  x.save();
+  x.fillStyle = '#fff';
+  x.fillRect(cx - half - 4, cy - half - 4, size + 8, size + 8);
+  x.fillStyle = f.belly;
+  x.globalAlpha = .35;
+  x.fillRect(cx - half, cy - half, size, size);
+  x.globalAlpha = 1;
+
+  // draw the cat in a 100x100 space
+  x.translate(cx - half, cy - half);
+  x.scale(size / 100, size / 100);
+
+  const tri = (pts, fill) => {
+    x.fillStyle = fill; x.beginPath();
+    x.moveTo(pts[0], pts[1]); x.lineTo(pts[2], pts[3]); x.lineTo(pts[4], pts[5]);
+    x.closePath(); x.fill();
+  };
+  const ell = (a, b, rx, ry, fill) => {
+    x.fillStyle = fill; x.beginPath(); x.ellipse(a, b, rx, ry, 0, 0, Math.PI * 2); x.fill();
+  };
+
+  tri([22, 40, 26, 15, 44, 30], f.base);
+  tri([78, 40, 74, 15, 56, 30], f.base);
+  tri([27, 37, 29.5, 22, 40, 31], '#f6b8c4');
+  tri([73, 37, 70.5, 22, 60, 31], '#f6b8c4');
+
+  ell(50, 56, 30, 27, f.base);
+  ell(50, 64, 19, 16, f.belly);
+
+  if (i % 3 === 0) {
+    x.strokeStyle = f.dark; x.lineWidth = 3.2; x.lineCap = 'round';
+    [[38, 33, 40, 46], [50, 30, 50, 43], [62, 33, 60, 46]].forEach(s => {
+      x.beginPath(); x.moveTo(s[0], s[1]); x.quadraticCurveTo(s[0] + 2, s[1] + 7, s[2], s[3]); x.stroke();
+    });
+  }
+
+  ell(39, 53, 5.5, 6.5, '#fff');
+  ell(61, 53, 5.5, 6.5, '#fff');
+  ell(39, 53.5, 3, 4.5, eyeColor || '#3a3a3a');
+  ell(61, 53.5, 3, 4.5, eyeColor || '#3a3a3a');
+  ell(40.3, 51.4, 1.2, 1.2, '#fff');
+  ell(62.3, 51.4, 1.2, 1.2, '#fff');
+
+  tri([47, 62, 53, 62, 50, 66], '#e98a9c');
+
+  x.strokeStyle = f.dark; x.lineWidth = 2; x.lineCap = 'round';
+  x.beginPath(); x.moveTo(50, 66); x.quadraticCurveTo(46, 71, 42, 68); x.stroke();
+  x.beginPath(); x.moveTo(50, 66); x.quadraticCurveTo(54, 71, 58, 68); x.stroke();
+
+  x.lineWidth = 1.6; x.globalAlpha = .8;
+  [[20, 60, 36, 62], [20, 67, 36, 66], [80, 60, 64, 62], [80, 67, 64, 66]].forEach(w => {
+    x.beginPath(); x.moveTo(w[0], w[1]); x.lineTo(w[2], w[3]); x.stroke();
+  });
+  x.restore();
+}
+
+/** #rrggbb + alpha -> rgba() */
+function hexA(hex, a) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(ch => ch + ch).join('') : h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
 function downloadCert(kind, trackId) {
@@ -2793,18 +3373,26 @@ function downloadCert(kind, trackId) {
       name: who,
       body: 'has completed a self-directed 84-day program covering client management systems, structured data, workflow automation, AI integration and applied tool building — demonstrating practical competence across the following platforms:',
       items: TRACKS.map(t => t.name),
-      footRight: 'Technical VA → AI Automation Specialist'
+      accent: '#4f46e5',
+      ink: '#33475b',
+      catIndex: 8,                       // the 9th cat, unique to this one
+      iconPath: null
     };
   } else {
     const t = TRACKS.find(z => z.id === trackId);
     if (!t) return;
+    const b = BRAND[t.id];
+    const ic = TOOL_ICON[t.id];
     cfg = {
       title: t.name,
       subtitle: `${t.weeksLabel} · ${trackProgress(t).total} daily tasks`,
       name: who,
       body: `has completed every module in the ${t.name} track of the AI Automation Specialist roadmap, covering:`,
       items: t.modules.map(m => `Week ${m.week}: ${m.title}`),
-      footRight: 'AI Automation Specialist Roadmap'
+      accent: t.color,
+      ink: b ? b.ink : '#33475b',
+      catIndex: TRACKS.indexOf(t),       // each track gets its own cat
+      iconPath: ic ? ic.d : null
     };
   }
 
@@ -2860,7 +3448,40 @@ P.S. Attach the certificate PNG you just downloaded to this email so you have a 
    ========================================================= */
 const Music = (() => {
   let player = null, ready = false, wanted = null, unlocked = false;
-  const tried = new Set();          // stations already proven unembeddable here
+  let watchdog = null;              // catches a station that loads but never plays
+  const tried = new Set();          // stations already proven unplayable here
+
+  /* A 24/7 stream that has gone offline still LOADS fine — it just never
+     reaches the PLAYING state and fires no error. So after asking for a
+     station, give it 9 seconds to actually start; if it hasn't, move on. */
+  function armWatchdog() {
+    clearTimeout(watchdog);
+    watchdog = setTimeout(() => {
+      if (!ready || !player || !player.getPlayerState) return;
+      if (player.getPlayerState() === 1) return;          // 1 = PLAYING, fine
+      nextStation('that one is offline — switching');
+    }, 9000);
+  }
+
+  /** Move to the next genre in the list, remembering the dud. */
+  function nextStation(why) {
+    const picker = $('#musicPick');
+    if (!picker) return;
+    const opts = Array.from(picker.options).map(o => o.value);
+    const cur  = state.musicId || opts[0];
+    tried.add(cur);
+    const next = opts.find(v => !tried.has(v));
+    if (!next) { setMeta('no station would play'); return; }
+    state.musicId = next;
+    saveState();
+    picker.value = next;
+    setMeta(why || 'switching station…');
+    if (player && player.loadVideoById) {
+      player.loadVideoById({ videoId: next });
+      if (unlocked) { player.unMute(); player.setVolume(state.musicVol == null ? 35 : state.musicVol); }
+      armWatchdog();
+    }
+  }
 
   const nameOf = id => {
     const opt = $('#musicPick') && $('#musicPick').querySelector(`option[value="${id}"]`);
@@ -2877,7 +3498,7 @@ const Music = (() => {
   }
 
   window.onYouTubeIframeAPIReady = function () {
-    const id = state.musicId || 'jfKfPfyJRdk';
+    const id = state.musicId || 'CFGLoQIhmow';
     player = new YT.Player('ytPlayer', {
       videoId: id,
       playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1, rel: 0, loop: 1, playlist: id },
@@ -2891,38 +3512,41 @@ const Music = (() => {
           setBtn(state.musicOn !== false);
         },
         onStateChange: e => {
-          if (e.data === YT.PlayerState.PLAYING) { setBtn(true); setMeta(nameOf(state.musicId || 'jfKfPfyJRdk')); }
-          if (e.data === YT.PlayerState.PAUSED)  setBtn(false);
-          if (e.data === YT.PlayerState.ENDED && player.loadVideoById) player.loadVideoById(state.musicId || 'jfKfPfyJRdk');
+          if (e.data === YT.PlayerState.PLAYING) {
+            clearTimeout(watchdog);            // it started, all good
+            setBtn(true);
+            setMeta(nameOf(state.musicId));
+          }
+          if (e.data === YT.PlayerState.PAUSED) setBtn(false);
+          // a finished mix simply restarts
+          if (e.data === YT.PlayerState.ENDED && player.loadVideoById) {
+            player.loadVideoById(state.musicId);
+          }
         },
         // A station can refuse to embed. Walk down the list rather than dead-ending.
-        onError: () => {
-          const opts = Array.from($('#musicPick').options).map(o => o.value);
-          const i = opts.indexOf(state.musicId || opts[0]);
-          const next = opts[(i + 1) % opts.length];
-          if (tried.has(next) || tried.size >= opts.length) {
-            setMeta('no station could load here');
-            return;
-          }
-          tried.add(next);
-          state.musicId = next; saveState();
-          $('#musicPick').value = next;
-          setMeta('switching station…');
-          player.loadVideoById({ videoId: next });
-        }
+        onError: () => nextStation('that one would not load — switching')
       }
     });
   };
 
-  /** First real user gesture: legally allowed to make noise now. */
-  function unlock() {
-    if (unlocked || !ready || !player) return;
+  /** First real user gesture: legally allowed to make noise now.
+   *  If the IFrame API has not finished loading yet we must WAIT and try
+   *  again — the old version gave up silently, and because the gesture
+   *  listener had already been removed, the player stayed muted forever. */
+  function unlock(tries) {
+    if (unlocked) return;
+    if (!ready || !player) {
+      const n = tries || 0;
+      if (n < 24) setTimeout(() => unlock(n + 1), 250);   // keep trying for ~6s
+      return;
+    }
     unlocked = true;
     if (state.musicOn !== false) {
       player.unMute();
       player.setVolume(state.musicVol == null ? 35 : state.musicVol);
       player.playVideo();
-      setMeta(nameOf(state.musicId || 'jfKfPfyJRdk'));
+      setMeta(nameOf(state.musicId));
+      armWatchdog();
     }
   }
 
@@ -2949,12 +3573,18 @@ const Music = (() => {
       if (ready && player) { player.setVolume(v); if (v > 0) player.unMute(); }
     },
     pick(id) {
-      state.musicId = id; saveState();
+      state.musicId = id;
+      tried.clear();                 // a fresh manual choice deserves a clean slate
+      saveState();
       if (!ready || !player) return;
       player.loadVideoById({ videoId: id });
       player.setVolume(state.musicVol == null ? 35 : state.musicVol);
-      if (unlocked) player.unMute();
-      setMeta(nameOf(id));
+      // choosing a genre IS a user gesture, so we are allowed to make noise
+      unlocked = true;
+      player.unMute();
+      player.playVideo();
+      setMeta(nameOf(id) + ' · starting…');
+      armWatchdog();
     }
   };
 })();
@@ -2964,8 +3594,46 @@ const Music = (() => {
    is open. The main lofi ducks out and comes back on close.
    ========================================================= */
 const AboutMusic = (() => {
-  const VIDEO = 'ocTdA8NytIc';
-  let p = null, ready = false, resumeMain = false;
+  /* A pool of anime mixes. One is picked at random each time the About
+     panel opens, and we drop in at a random point inside it — so you get
+     a different track almost every visit.
+
+     All three are ordinary uploads, not 24/7 live streams. A stream that
+     has ended still loads a player and plays silence, which is exactly
+     what broke the lofi stations earlier. */
+  const VIDEOS = [
+    'yg0JcqzKjfM',   // 90's Anime Hits Playlist
+    'Ub675XMsaZs',   // Vampire Knight — openings & endings
+    '4xQ2go7zv5Q'    // Anime Openings & Endings Mix — full songs
+  ];
+  let VIDEO = VIDEOS[Math.floor(Math.random() * VIDEOS.length)];
+  let p = null, ready = false, resumeMain = false, guard = null;
+
+  /** Choose a different mix from the one currently loaded. */
+  function pickVideo() {
+    if (VIDEOS.length < 2) return VIDEOS[0];
+    let next = VIDEO;
+    while (next === VIDEO) next = VIDEOS[Math.floor(Math.random() * VIDEOS.length)];
+    VIDEO = next;
+    return VIDEO;
+  }
+
+  /* YouTube's `rel=0` has not actually disabled related videos since 2018 —
+     it only limits them to the same channel. So when a track finishes, the
+     embed can wander off into whatever it feels like playing next. This
+     checks what is ACTUALLY loaded every few seconds and drags it back. */
+  function startGuard() {
+    clearInterval(guard);
+    guard = setInterval(() => {
+      if (!ready || !p || !p.getVideoData) return;
+      let data = null;
+      try { data = p.getVideoData(); } catch (_) { return; }
+      if (data && data.video_id && data.video_id !== VIDEO) {
+        try { p.loadVideoById({ videoId: VIDEO }); if (!state.aboutMuted) p.unMute(); } catch (_) {}
+      }
+    }, 4000);
+  }
+  function stopGuard() { clearInterval(guard); guard = null; }
 
   function build(then, tries) {
     if (p) { then && then(); return; }
@@ -2979,7 +3647,9 @@ const AboutMusic = (() => {
     }
     p = new YT.Player('ytAbout', {
       videoId: VIDEO,
-      playerVars: { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1, rel: 0, loop: 1, playlist: VIDEO },
+      // no loop/playlist params — looping is handled in code below, which is
+      // more reliable than asking the embed to do it
+      playerVars: { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1, rel: 0 },
       events: {
         onReady: e => {
           ready = true;
@@ -2987,7 +3657,10 @@ const AboutMusic = (() => {
           then && then();
         },
         // loop=1 is unreliable on some videos, so restart it by hand too
-        onStateChange: e => { if (e.data === YT.PlayerState.ENDED && p.seekTo) { p.seekTo(0); p.playVideo(); } },
+        onStateChange: e => {
+          // finished -> start it over rather than letting YouTube pick something
+          if (e.data === YT.PlayerState.ENDED && p.seekTo) { p.seekTo(0); p.playVideo(); }
+        },
         onError: () => setBtn('unavailable')
       }
     });
@@ -3005,16 +3678,32 @@ const AboutMusic = (() => {
     start() {
       resumeMain = Music.isPlaying();
       if (resumeMain) Music.duck();
+
+      // already built? swap to a different mix for this visit
+      const swap = !!p;
+      if (swap) pickVideo();
+
       build(() => {
         if (!ready || !p) return;
+        if (swap && p.loadVideoById) p.loadVideoById({ videoId: VIDEO });
         p.setVolume(state.aboutVol == null ? 45 : state.aboutVol);
         state.aboutMuted ? p.mute() : p.unMute();
-        p.seekTo(0);
+        // Drop in at a random point in the mix so it is a different song
+        // each visit. getDuration() is 0 until metadata loads, so fall
+        // back to the start if we ask too early.
+        let at = 0;
+        try {
+          const dur = p.getDuration ? p.getDuration() : 0;
+          if (dur > 60) at = Math.floor(Math.random() * (dur * 0.85));
+        } catch (_) {}
+        p.seekTo(at, true);
         p.playVideo();
       });
+      startGuard();
       setBtn();
     },
     stop() {
+      stopGuard();
       if (ready && p && p.pauseVideo) { p.pauseVideo(); if (p.seekTo) p.seekTo(0); }
       if (resumeMain) Music.unduck();
       resumeMain = false;
@@ -3284,7 +3973,16 @@ window.addEventListener('pageshow', e => { if (e.persisted) Timer.repaint(); });
 
   if (state.utilHidden) { $('#utilBar').hidden = true; $('#utilOpen').hidden = false; }
   $('#musicVol').value = state.musicVol == null ? 35 : state.musicVol;
-  if (state.musicId) $('#musicPick').value = state.musicId;
+
+  // A station saved before the genre list changed may no longer exist.
+  // Fall back to the first option rather than showing a blank selector.
+  const picker  = $('#musicPick');
+  const genreIds = Array.from(picker.options).map(o => o.value);
+  if (!state.musicId || genreIds.indexOf(state.musicId) === -1) {
+    state.musicId = genreIds[0];
+    saveState();
+  }
+  picker.value = state.musicId;
   $('#musicVol').addEventListener('input', e => Music.volume(+e.target.value));
   $('#musicPick').addEventListener('change', e => Music.pick(e.target.value));
 

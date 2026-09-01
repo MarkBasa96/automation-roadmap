@@ -26,6 +26,25 @@
 </head>
 <body>
 
+<!-- reusable paw shapes for the certificates -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="paw">
+      <ellipse cx="12" cy="15" rx="4.6" ry="4"/>
+      <ellipse cx="6.6" cy="9.4" rx="2.1" ry="2.7"/>
+      <ellipse cx="10.3" cy="6.8" rx="2.1" ry="2.9"/>
+      <ellipse cx="14.2" cy="6.9" rx="2.1" ry="2.9"/>
+      <ellipse cx="17.6" cy="9.6" rx="2.1" ry="2.7"/>
+    </g>
+    <g id="pawset">
+      <g transform="translate(4,10) rotate(-18)"><use href="#paw" transform="scale(1.5)"/></g>
+      <g transform="translate(52,2) rotate(12)"><use href="#paw" transform="scale(1.2)"/></g>
+      <g transform="translate(10,58) rotate(8)"><use href="#paw" transform="scale(1.25)"/></g>
+      <g transform="translate(56,52) rotate(-10)"><use href="#paw" transform="scale(1.6)"/></g>
+    </g>
+  </defs>
+</svg>
+
 <!-- ============ MOBILE TOP BAR ============ -->
 <header class="topbar">
   <button class="icon-btn" id="menuToggle" aria-label="Open navigation" aria-expanded="false">
@@ -387,12 +406,28 @@
         <div class="util-meta" id="musicName">lofi · loading…</div>
         <div class="util-row">
           <input type="range" id="musicVol" min="0" max="100" step="1" value="35" aria-label="Music volume" />
-          <select id="musicPick" aria-label="Choose a station">
-            <option value="jfKfPfyJRdk">Lofi Girl radio</option>
-            <option value="lP26UCnoH9s">Coffee Shop Radio ☕</option>
-            <option value="kgx4WGK0oNU">Jazz / lofi hip hop 🌱</option>
-            <option value="CFGLoQIhmow">Lofi hip hop mix</option>
-            <option value="1Tl2FtV06qo">Asian lofi radio ⛩️</option>
+          <select id="musicPick" aria-label="Choose a genre">
+            <!-- All checked for BOTH embeddability and live status.
+                 A 24/7 "radio" whose stream has ended still loads a page
+                 but plays nothing, which is exactly what went silent
+                 before — so plain uploaded mixes are preferred. -->
+            <optgroup label="Focus">
+              <option value="CFGLoQIhmow">🎧 Lofi hip hop</option>
+              <option value="blAFxjhg62k">☕ Coffee shop lofi</option>
+              <option value="Dx5qFachd3A">🎹 Jazz piano</option>
+              <option value="1Tl2FtV06qo">⛩️ Asian lofi</option>
+            </optgroup>
+            <optgroup label="Calm">
+              <option value="-5ajVJ1Yxlg">🌧️ Piano &amp; rain</option>
+              <option value="wOMwO5T3yT4">🌆 Synthwave night</option>
+            </optgroup>
+            <optgroup label="Sing along">
+              <option value="gil4-8nSm60">💙 New OPM chill</option>
+              <option value="Q9aK0VUfl4o">🔥 Skusta Clee &amp; OPM rap</option>
+              <option value="kdW_niTmBzM">🇵🇭 OPM love songs</option>
+              <option value="RkCKMmNv4_Q">📼 90s throwback</option>
+              <option value="njqkg8o4C84">🎸 90s rock</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -699,31 +734,59 @@
       </div>
     </div>
 
-    <div class="cert" id="certificate">
-      <div class="cert-inner">
-        <div class="cert-seal" aria-hidden="true">⚡</div>
-        <p class="cert-kicker">Certificate of Completion</p>
-        <h3 class="cert-title">AI Automation Specialist</h3>
-        <p class="cert-sub">Technical Virtual Assistant Program · 12 Weeks · 84 Days</p>
-        <p class="cert-awarded">This certifies that</p>
-        <p class="cert-name" id="certNameOut">Your Name</p>
-        <p class="cert-body">
-          has completed a self-directed 84-day program covering client management systems,
-          structured data, workflow automation, AI integration and applied tool building —
-          demonstrating practical competence across the following platforms:
-        </p>
-        <ul class="cert-tools" id="certTools"></ul>
-        <div class="cert-foot">
-          <div class="cert-foot-col">
-            <div class="cert-line"></div>
-            <div class="cert-foot-label">Date of completion</div>
-            <div class="cert-foot-value" id="certDate">—</div>
+    <div class="cert cert-master" id="certificate">
+      <div class="cert-frame">
+        <div class="cert-inner">
+
+          <div class="cert-paws" aria-hidden="true">
+            <svg viewBox="0 0 120 120"><use href="#pawset"/></svg>
           </div>
-          <div class="cert-foot-col">
-            <div class="cert-line"></div>
-            <div class="cert-foot-label">Program</div>
-            <div class="cert-foot-value">Technical VA → AI Automation Specialist</div>
+          <div class="cert-photo" id="certCat"></div>
+
+          <div class="cert-brand"><span class="cert-brand-text">Visual Studio Joe</span></div>
+
+          <p class="cert-kicker">Certificate of Completion</p>
+          <div class="cert-rule" aria-hidden="true"><span></span><i>❋</i><span></span></div>
+          <h3 class="cert-title">AI Automation Specialist</h3>
+          <p class="cert-sub">Technical Virtual Assistant Program · 12 Weeks · 84 Days</p>
+
+          <p class="cert-awarded">This certifies that</p>
+          <p class="cert-name" id="certNameOut">Your Name</p>
+          <div class="cert-nameline" aria-hidden="true"></div>
+
+          <p class="cert-body">
+            has completed a self-directed 84-day program covering client management systems,
+            structured data, workflow automation, AI integration and applied tool building —
+            demonstrating practical competence across the following platforms:
+          </p>
+
+          <ul class="cert-tools" id="certTools"></ul>
+
+          <div class="cert-foot">
+            <div class="cert-foot-col">
+              <div class="cert-foot-top" id="certDate">—</div>
+              <div class="cert-line"></div>
+              <div class="cert-foot-label">Date of completion</div>
+            </div>
+            <div class="cert-seal-wrap" aria-hidden="true">
+              <div class="cert-seal">
+                <svg viewBox="0 0 24 24"><use href="#paw"/></svg>
+                <span>CERTIFIED</span>
+              </div>
+            </div>
+            <div class="cert-foot-col">
+              <div class="cert-foot-top cert-sig">Joemark Basa</div>
+              <div class="cert-line"></div>
+              <div class="cert-foot-label">App developer</div>
+            </div>
           </div>
+
+          <p class="cert-disclaimer">
+            For fun, not for hiring. This is a personal-project completion record from an
+            independently built roadmap — it is not an accredited qualification and carries no
+            formal recognition. It simply says you finished this course. The official
+            certifications live with HubSpot Academy, Zapier, Make, n8n and the rest.
+          </p>
         </div>
       </div>
     </div>
