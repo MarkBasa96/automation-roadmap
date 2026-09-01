@@ -1005,7 +1005,7 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
    STUDY BUDDY DOCK
    ========================================================= */
 .dock {
-  position: fixed; right: 22px; top: 84px; width: 262px; z-index: 45;
+  position: static; width: 100%;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
@@ -1070,12 +1070,10 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
    DOCK AS A FLOATING WINDOW — draggable + freely resizable
    ========================================================= */
 .dock {
-  resize: both;                 /* native corner grabber */
-  overflow: hidden;             /* required for `resize` to appear */
-  min-width: 200px;  min-height: 210px;
-  max-width: 92vw;   max-height: 88vh;
-  width: 262px;      height: 372px;
-  display: none;                /* re-enabled at >=1500px below */
+  overflow: hidden;
+  width: 100%;
+  height: 372px;
+  display: none;                /* re-enabled in the rail below */
   flex-direction: column;
 }
 .dock-head {
@@ -1251,13 +1249,9 @@ body::before {
    ========================================================= */
 /* Top right, in the gutter — sits directly ABOVE the Study Buddy
    window (which starts at top:84px), so the two never collide. */
-/* Width tracks the Study Buddy window (--dock-w, kept in sync by JS) so the
-   two stack as one tidy column and never spill into the page content. */
 .utilbar {
-  position: fixed; top: 18px; right: 22px; left: auto; bottom: auto;
-  z-index: 70;              /* above .shell(1), .sidebar(40), .dock(45), .topbar(60) */
-  width: var(--dock-w, 262px);
-  max-width: calc(100vw - 44px);
+  position: static;
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas: "timer collapse" "music collapse";
@@ -1744,4 +1738,184 @@ body::before {
 .util-collapse { width: 20px; border-left: 1px solid var(--border); border-top: 0; }
 
 /* the Study Buddy now sits below the util bar */
-.dock { top: 152px; }
+
+
+
+/* =========================================================
+   RIGHT RAIL — locked, non-draggable, non-resizable
+
+   The timer/music bar and the Study Buddy used to be
+   `position: fixed`, which meant they floated ON TOP of the
+   page and covered the content underneath. They are now
+   children of `.rail`, a real third column in the flex row.
+
+   Because the rail occupies actual layout space, `.main`
+   ends exactly where the rail begins. Overlap is now
+   impossible rather than merely avoided.
+   ========================================================= */
+.rail {
+  flex: 0 0 300px;
+  width: 300px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  padding: 18px 18px 18px 0;
+  display: none;                 /* shown at >=1440px, see below */
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* everything inside the rail is fixed in place */
+.rail .utilbar,
+.rail .dock {
+  position: static !important;
+  left: auto !important;  top: auto !important;
+  right: auto !important; bottom: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  resize: none !important;       /* kills the native corner grabber */
+  margin: 0;
+}
+.rail .dock {
+  flex: 1 1 auto;
+  min-height: 260px;
+  height: auto;
+}
+.dock-head { cursor: default; }   /* no longer a drag handle */
+
+/* Minimised state: each panel collapses to a small round icon that
+   sits in the rail (not floating over the page like the old version). */
+.rail .dock-open,
+.rail .util-open {
+  position: static !important;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 auto;
+  align-self: flex-end;          /* tuck against the right edge */
+  border-radius: 50% !important;
+  padding: 0;
+  font-size: 19px;
+  line-height: 1;
+  display: grid !important;
+  place-items: center;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: border-color .12s, transform .12s, box-shadow .12s;
+}
+.rail .dock-open:hover,
+.rail .util-open:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Wide screens only: there has to be real room for a third column.
+   sidebar 268 + content ~880 + rail 300 = about 1440. */
+@media (min-width: 1440px) {
+  .rail { display: flex; }
+  .rail .dock { display: flex !important; }
+}
+
+/* MUST come after the media query above.
+   `.rail .dock` and `.rail [hidden]` have the same specificity (0,2,0)
+   and both use !important, so whichever is written LAST wins. Listing
+   the hidden rule here — and giving it an extra class/attribute so it
+   scores 0,3,0 — is what makes the minimise buttons actually work. */
+.rail .dock[hidden],
+.rail .utilbar[hidden],
+.rail .dock-open[hidden],
+.rail .util-open[hidden] { display: none !important; }
+
+/* Below that the rail drops under the content as a normal block,
+   full width, so it still stacks readably and still never overlaps. */
+@media (max-width: 1439px) {
+  .shell { flex-wrap: wrap; }
+  .rail {
+    display: flex;
+    flex: 1 1 100%;
+    width: auto;
+    max-width: 100%;
+    position: static;
+    height: auto;
+    padding: 0 44px 40px;
+  }
+  /* game needs the gutter width, so hide it AND its restore icon —
+     otherwise the icon would reveal something that cannot show */
+  .rail .dock,
+  .rail .dock-open { display: none !important; }
+  .rail .utilbar { max-width: 520px !important; }
+}
+@media (max-width: 960px) {
+  .rail { padding: 0 18px 32px; }
+}
+
+/* =========================================================
+   ICON TOOLTIPS
+   A small label on hover/focus. Drawn below-right of the icon
+   because the rail clips horizontally (it scrolls vertically),
+   so a tooltip sticking out to the left would be cut off.
+   ========================================================= */
+.rail [data-tip] { position: relative; overflow: visible !important; }
+
+.rail [data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  background: var(--text);
+  color: var(--bg-elev);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  line-height: 1;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .14s ease, transform .14s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+.rail [data-tip]:hover::after,
+.rail [data-tip]:focus-visible::after { opacity: 1; transform: translateY(0); }
+
+/* nothing to show on a touch screen, where there is no hover */
+@media (pointer: coarse) { .rail [data-tip]::after { display: none; } }
+
+/* the rail must not clip the tooltip */
+.rail { overflow: visible; }
+
+/* =========================================================
+   WIDE / MULTI-MONITOR FIT
+
+   The three columns are: sidebar 268 + main (capped) + rail 300.
+   Because `.main` is capped for readability, on a wide screen the
+   row stops short of the window edge and leaves dead space AFTER
+   the rail — which is what made the second monitor look wrong.
+
+   `margin-left: auto` on the rail pushes it flush to the right on
+   any screen, so the leftover space becomes a normal gutter
+   between the content and the rail instead of a gap at the edge.
+   ========================================================= */
+.rail { margin-left: auto; }
+
+/* let the content take a little more of a big screen before the
+   gutter opens up (1180 -> 1280 keeps lines readable) */
+@media (min-width: 1440px) {
+  .main { max-width: 1280px; }
+}
+
+/* On a very wide or ultrawide display, stop the row stretching
+   apart and centre the whole thing instead. */
+@media (min-width: 2000px) {
+  .shell { max-width: 2000px; margin-inline: auto; }
+}

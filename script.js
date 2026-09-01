@@ -537,8 +537,8 @@ const defaultState = () => ({
   fishBest: 0,         // highest score ever recorded
   muted: false,        // study-buddy sound
   dockHidden: false,
-  dockPos: null,       // { left, top } once dragged
-  dockSize: null,      // { w, h } once resized
+  dockPos: null,       // legacy, cleared on load
+  dockSize: null,      // legacy, cleared on load
   email: '',           // stays in this browser; only used to pre-fill mailto
   photo: '',           // 256px data-URI avatar, this browser only
   onboarded: false,
@@ -549,7 +549,7 @@ const defaultState = () => ({
   aboutMuted: false,
   utilHidden: false,
   tracksOpen: true,      // sidebar Tracks dropdown
-  timer: { running: false, accum: 0, startedAt: null, notified: false }
+  timer: { running: false, accum: 0, notified: false }
 });
 
 /* ---------- profile registry ---------- */
@@ -3030,24 +3030,60 @@ const AboutMusic = (() => {
 
 /* =========================================================
    FOCUS TIMER — counts up, nudges you at the 1-hour mark.
-   Survives a refresh by storing when it started.
+
+   HOW TIME IS COUNTED (this matters):
+   `accum` is the only number ever saved. It holds real banked
+   milliseconds. Every tick we add the slice that just passed:
+
+       accum += now - lastTick
+
+   `lastTick` lives in memory ONLY and is never written to storage.
+   That is the whole trick. Because a fresh page load starts with
+   lastTick = null, there is no timestamp left over from last time
+   for the clock to "catch up" against — so closing the site can
+   never make the timer jump forward.
+
+   Measuring a real wall-clock slice each tick (rather than just
+   adding 1000ms) keeps it accurate when the browser throttles
+   background tabs, so switching tabs still counts properly.
    ========================================================= */
 const Timer = (() => {
   const GOAL = 60 * 60 * 1000;                 // one hour
+  const SAVE_EVERY = 5000;                     // throttle writes to localStorage
   let iv = null;
+  let lastTick = null;                         // in memory only — never persisted
+  let lastSave = 0;
 
-  const t = () => state.timer || (state.timer = { running: false, accum: 0, startedAt: null, notified: false });
+  const t = () => state.timer || (state.timer = { running: false, accum: 0, notified: false });
+
+  /** Bank the slice of time since the previous tick. */
+  function checkpoint() {
+    const s = t();
+    if (!s.running) return;
+    const now = Date.now();
+    if (lastTick != null) s.accum += Math.max(0, now - lastTick);
+    lastTick = now;
+  }
+
   function elapsed() {
     const s = t();
-    return s.accum + (s.running && s.startedAt ? Date.now() - s.startedAt : 0);
+    // lastTick is null right after a load, so nothing is ever reconstructed
+    return s.accum + (s.running && lastTick != null ? Math.max(0, Date.now() - lastTick) : 0);
   }
   const two = n => String(n).padStart(2, '0');
 
   function paint() {
+    checkpoint();                              // bank time before we read it
     const ms  = elapsed();
     const min = Math.floor(ms / 60000);
     const sec = Math.floor(ms / 1000) % 60;
     const s   = t();
+
+    // periodic save so a browser crash loses seconds, not the session
+    if (s.running && Date.now() - lastSave > SAVE_EVERY) {
+      lastSave = Date.now();
+      saveState();
+    }
     if ($('#timerTime')) $('#timerTime').textContent = `${two(min)}:${two(sec)}`;
     if ($('#timerFill')) $('#timerFill').style.width = Math.min(100, ms / GOAL * 100) + '%';
     if ($('#timerToggle')) $('#timerToggle').textContent = s.running ? '❚❚' : '▶';
@@ -3082,25 +3118,47 @@ const Timer = (() => {
     elapsed,
     init() {
       const s = t();
-      if (s.running && !s.startedAt) s.startedAt = Date.now();
+      delete s.startedAt;          // legacy field from the old wall-clock version
+      s.running = false;           // ALWAYS open paused — never resume by itself
+      lastTick = null;
+      saveState();
       loop();
     },
     start() {
       const s = t();
       if (s.running) return;
-      s.running = true; s.startedAt = Date.now();
+      s.running = true;
+      lastTick = Date.now();       // start measuring from now, not from storage
+      lastSave = Date.now();
       saveState(); paint();
     },
     pause() {
       const s = t();
       if (!s.running) return;
-      s.accum += Date.now() - s.startedAt;
-      s.running = false; s.startedAt = null;
+      checkpoint();                // bank the final slice before stopping
+      s.running = false;
+      lastTick = null;
       saveState(); paint();
     },
     toggle() { t().running ? this.pause() : this.start(); },
+
+    /** Page is going away: bank the time and stop. */
+    suspend() {
+      const s = t();
+      if (!s.running) { saveState(); return; }
+      checkpoint();
+      s.running = false;
+      lastTick = null;
+      saveState();
+    },
+    /** Tab hidden: bank what we have but keep running. */
+    flush() { checkpoint(); saveState(); },
+    /** Redraw the display (used after returning from bfcache). */
+    repaint() { paint(); },
+
     reset() {
-      state.timer = { running: false, accum: 0, startedAt: null, notified: false };
+      state.timer = { running: false, accum: 0, notified: false };
+      lastTick = null;
       saveState(); paint();
       document.title = 'AI Automation VA Roadmap';
     },
@@ -3108,86 +3166,87 @@ const Timer = (() => {
   };
 })();
 
+
 /* ---------------------------------------------------------
-   DOCK WINDOW — drag by the title bar, resize from the corner
+   TIMER PAGE LIFECYCLE
+
+   Closing / reloading / navigating away  -> pause and save.
+   Switching tabs or minimising           -> keep running,
+                                             just save progress.
    --------------------------------------------------------- */
-/** Keep the timer/music bar exactly as wide as the Study Buddy window. */
-function syncUtilWidth() {
-  if (!el.dock || el.dock.hidden) return;
-  const w = Math.round(el.dock.getBoundingClientRect().width);
-  if (w > 40) document.documentElement.style.setProperty('--dock-w', w + 'px');
-}
+// `pagehide` is the reliable one (fires on mobile Safari and on
+// bfcache); `beforeunload` covers older desktop cases. Running both
+// is harmless because suspend() is safe to call twice.
+window.addEventListener('pagehide', () => Timer.suspend());
+window.addEventListener('beforeunload', () => Timer.suspend());
 
-function clampDockIntoView() {
-  const r = el.dock.getBoundingClientRect();
-  const maxL = Math.max(8, window.innerWidth  - r.width  - 8);
-  const maxT = Math.max(8, window.innerHeight - r.height - 8);
-  const L = Math.min(Math.max(8, r.left), maxL);
-  const T = Math.min(Math.max(8, r.top),  maxT);
-  el.dock.style.left = L + 'px';
-  el.dock.style.top  = T + 'px';
-  el.dock.style.right = 'auto';
-  state.dockPos = { left: L, top: T };
-}
+// Hidden tab: bank progress but DO NOT pause — a tab switch should
+// keep counting, which is why this calls flush() and not suspend().
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) Timer.flush();
+});
 
-(function makeDockDraggable() {
-  const head = document.querySelector('.dock-head');
-  if (!head || !el.dock) return;
-  let dragging = false, offX = 0, offY = 0;
+// Coming back from the browser's back/forward cache: the page was
+// suspended, so repaint to show the paused state.
+window.addEventListener('pageshow', e => { if (e.persisted) Timer.repaint(); });
+/* ---------------------------------------------------------
+   DOCK WINDOW
 
-  head.addEventListener('pointerdown', e => {
-    if (e.target.closest('button')) return;          // minimise button still works
-    const r = el.dock.getBoundingClientRect();
-    dragging = true;
-    offX = e.clientX - r.left;
-    offY = e.clientY - r.top;
-    el.dock.style.left = r.left + 'px';
-    el.dock.style.top  = r.top + 'px';
-    el.dock.style.right = 'auto';
-    el.dock.classList.add('dragging');
-    head.setPointerCapture(e.pointerId);
-    e.preventDefault();
-  });
+   The Study Buddy and the timer/music bar used to be
+   free-floating windows you could drag and resize. They now
+   live inside `.rail`, a real layout column, so their size and
+   position are fixed by CSS and cannot be moved. The old drag
+   handler, resize observer and viewport-clamping code were
+   removed rather than disabled, so nothing can re-enable them.
 
-  head.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    const r = el.dock.getBoundingClientRect();
-    const L = Math.min(Math.max(8, e.clientX - offX), window.innerWidth  - r.width  - 8);
-    const T = Math.min(Math.max(8, e.clientY - offY), window.innerHeight - r.height - 8);
-    el.dock.style.left = L + 'px';
-    el.dock.style.top  = T + 'px';
-  });
+   Game.resize() still runs on window resize because the canvas
+   has to match whatever width the rail gives it.
+   --------------------------------------------------------- */
+/* ---------------------------------------------------------
+   VIEWPORT / MONITOR CHANGES
 
-  const end = e => {
-    if (!dragging) return;
-    dragging = false;
-    el.dock.classList.remove('dragging');
-    try { head.releasePointerCapture(e.pointerId); } catch (_) {}
-    const r = el.dock.getBoundingClientRect();
-    state.dockPos = { left: Math.round(r.left), top: Math.round(r.top) };
-    saveState();
-  };
-  head.addEventListener('pointerup', end);
-  head.addEventListener('pointercancel', end);
+   Dragging the window to a second monitor is not always a plain
+   resize. If that screen has different DPI scaling, the window can
+   keep the same CSS width while devicePixelRatio changes — and the
+   game canvas is sized in real device pixels, so it ends up blurry
+   or the wrong size with no `resize` event to tell us.
 
-  // Free resizing: CSS `resize: both` drives the box, this keeps the
-  // canvas resolution and the saved size in step with it.
-  if (window.ResizeObserver) {
-    let t;
-    new ResizeObserver(() => {
-      Game.resize();
-      syncUtilWidth();
-      clearTimeout(t);
-      t = setTimeout(() => {
-        const r = el.dock.getBoundingClientRect();
-        state.dockSize = { w: Math.round(r.width), h: Math.round(r.height) };
-        saveState();
-      }, 260);
-    }).observe(el.dock);
+   So we watch three things:
+     1. window resize            (normal size change)
+     2. devicePixelRatio change  (moved to a monitor with different scaling)
+     3. the rail's actual box    (any layout shift we did not predict)
+   --------------------------------------------------------- */
+(function watchViewport() {
+  let pending = null;
+
+  function refresh() {
+    clearTimeout(pending);
+    pending = setTimeout(() => {
+      if (typeof Game !== 'undefined' && Game.resize) Game.resize();
+      if (typeof Timer !== 'undefined' && Timer.repaint) Timer.repaint();
+    }, 120);                                  // debounce: dragging fires a lot
   }
 
-  window.addEventListener('resize', () => { if (!el.dock.hidden) clampDockIntoView(); });
+  window.addEventListener('resize', refresh);
+  window.addEventListener('orientationchange', refresh);
+
+  // Re-arm on every DPI change, because the query itself is built from
+  // the CURRENT ratio and stops matching once that ratio moves.
+  function watchDpi() {
+    const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    const onChange = () => { refresh(); watchDpi(); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange, { once: true });
+    else if (mq.addListener) mq.addListener(onChange);
+  }
+  try { watchDpi(); } catch (_) { /* very old browser: the resize listener still covers most cases */ }
+
+  // The rail is what actually decides the canvas width.
+  if (window.ResizeObserver) {
+    const rail = document.getElementById('rail');
+    if (rail) new ResizeObserver(refresh).observe(rail);
+  }
 })();
+
 
 /* ---------------------------------------------------------
    INIT
@@ -3215,6 +3274,14 @@ function clampDockIntoView() {
   /* ---- focus timer + lofi ---- */
   Timer.init();
   Music.boot();
+
+  // Both side panels ALWAYS open as icons. You expand the one you want;
+  // it is not remembered between visits, so every load starts tidy.
+  // The music is unaffected — its player lives in #ytHost outside the
+  // rail, so it keeps auto-playing whether the panel is shown or not.
+  state.utilHidden = true;
+  state.dockHidden = true;
+
   if (state.utilHidden) { $('#utilBar').hidden = true; $('#utilOpen').hidden = false; }
   $('#musicVol').value = state.musicVol == null ? 35 : state.musicVol;
   if (state.musicId) $('#musicPick').value = state.musicId;
@@ -3223,48 +3290,36 @@ function clampDockIntoView() {
 
   // Browsers block audio until the user interacts — the first click or
   // keypress anywhere unmutes the music and starts the timer.
+  // Unlocks audio only. The timer NEVER starts on its own — it starts
+  // when you press play, and nothing else.
   const firstGesture = () => {
     Music.unlock();
-    if (!state.timer || (!state.timer.running && !state.timer.accum)) Timer.start();
     document.removeEventListener('pointerdown', firstGesture);
     document.removeEventListener('keydown', firstGesture);
   };
   document.addEventListener('pointerdown', firstGesture);
   document.addEventListener('keydown', firstGesture);
 
-  // study buddy — restore where the window was left, then only run the
-  // loop when it is actually on screen
+  // study buddy — position and size come from the rail's CSS now, so
+  // there is no saved geometry to restore.
   el.gameScore.textContent = state.fish || 0;
   $('#gameSound').textContent = state.muted ? '🔇' : '🔊';
   Game.syncHud();
-  if (state.dockSize) {
-    el.dock.style.width  = state.dockSize.w + 'px';
-    el.dock.style.height = state.dockSize.h + 'px';
+
+  // clear geometry saved by the old draggable version, once
+  if (state.dockPos || state.dockSize) {
+    state.dockPos = null;
+    state.dockSize = null;
+    ['width', 'height', 'left', 'top', 'right'].forEach(p => el.dock.style.removeProperty(p));
+    saveState();
   }
-  // Restore a dragged position, but only if it still lands on screen —
-  // a saved spot from a bigger monitor must not strand the window.
-  if (state.dockPos) {
-    // the util bar now occupies the top of that column — push an old saved
-    // position down so the two can't overlap
-    if (state.dockPos.top < 145) state.dockPos.top = 152;
-    const okX = state.dockPos.left >= 0 && state.dockPos.left < window.innerWidth  - 60;
-    const okY = state.dockPos.top  >= 0 && state.dockPos.top  < window.innerHeight - 60;
-    if (okX && okY) {
-      el.dock.style.left  = state.dockPos.left + 'px';
-      el.dock.style.top   = state.dockPos.top + 'px';
-      el.dock.style.right = 'auto';
-      requestAnimationFrame(clampDockIntoView);
-    } else {
-      state.dockPos = null;               // fall back to the default right-hand spot
-      saveState();
-    }
-  }
-  const wide = window.matchMedia('(min-width: 1500px)');
+
+  const wide = window.matchMedia('(min-width: 1440px)');
   const syncDock = () => {
     if (state.dockHidden) { el.dock.hidden = true; $('#dockOpen').hidden = false; Game.stop(); return; }
     el.dock.hidden = false; $('#dockOpen').hidden = true;
     wide.matches && !document.hidden ? Game.start() : Game.stop();
-    syncUtilWidth();
+    Game.resize();
   };
   wide.addEventListener('change', syncDock);
   document.addEventListener('visibilitychange', syncDock);

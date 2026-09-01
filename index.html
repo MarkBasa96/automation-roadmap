@@ -102,9 +102,7 @@
         <button class="smenu-item" id="autoplayToggle" role="menuitem">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9V3z"/></svg>
           <span id="autoplayLabel">Autoplay: on</span>
-        </button>
-
-        <div class="smenu-sep"></div>
+        </button>        <div class="smenu-sep"></div>
         <button class="smenu-item" id="aboutBtn" role="menuitem">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.5v5M12 7.5v.6"/></svg>
           About the developer
@@ -120,8 +118,7 @@
         Settings
         <span class="settings-caret" aria-hidden="true">⌃</span>
       </button>
-    </div>
-  </aside>
+    </div>  </aside>
 
   <div class="scrim" id="scrim" hidden></div>
 
@@ -367,41 +364,69 @@
     </section>
 
   </main>
-</div>
 
-<!-- ============ FOCUS TIMER + LOFI PLAYER ============ -->
-<div class="utilbar" id="utilBar">
-  <div class="util util-timer">
-    <button class="util-btn primary" id="timerToggle" title="Start / pause focus timer">▶</button>
-    <div class="util-body">
-      <div class="util-time" id="timerTime">00:00</div>
-      <div class="util-meta" id="timerMeta">focus timer · paused</div>
-      <div class="util-track"><div class="util-track-fill" id="timerFill"></div></div>
+  <!-- ============ RIGHT RAIL — timer, music, study buddy ============
+       A real layout column, not a floating overlay. Because it takes up
+       space in the flex row, the main content ends where this begins and
+       nothing can ever sit on top of anything else. -->
+  <aside class="rail" id="rail">
+  <div class="utilbar" id="utilBar">
+    <div class="util util-timer">
+      <button class="util-btn primary" id="timerToggle" title="Start / pause focus timer">▶</button>
+      <div class="util-body">
+        <div class="util-time" id="timerTime">00:00</div>
+        <div class="util-meta" id="timerMeta">focus timer · paused</div>
+        <div class="util-track"><div class="util-track-fill" id="timerFill"></div></div>
+      </div>
+      <button class="util-btn ghost" id="timerReset" title="Reset timer to zero">↺</button>
     </div>
-    <button class="util-btn ghost" id="timerReset" title="Reset timer to zero">↺</button>
-  </div>
-
-  <div class="util util-music">
-    <button class="util-btn primary" id="musicToggle" title="Play / pause music">♪</button>
-    <div class="util-body">
-      <div class="util-meta" id="musicName">lofi · loading…</div>
-      <div class="util-row">
-        <input type="range" id="musicVol" min="0" max="100" step="1" value="35" aria-label="Music volume" />
-        <select id="musicPick" aria-label="Choose a station">
-          <option value="jfKfPfyJRdk">Lofi Girl radio</option>
-          <option value="lP26UCnoH9s">Coffee Shop Radio ☕</option>
-          <option value="kgx4WGK0oNU">Jazz / lofi hip hop 🌱</option>
-          <option value="CFGLoQIhmow">Lofi hip hop mix</option>
-          <option value="1Tl2FtV06qo">Asian lofi radio ⛩️</option>
-        </select>
+  
+    <div class="util util-music">
+      <button class="util-btn primary" id="musicToggle" title="Play / pause music">♪</button>
+      <div class="util-body">
+        <div class="util-meta" id="musicName">lofi · loading…</div>
+        <div class="util-row">
+          <input type="range" id="musicVol" min="0" max="100" step="1" value="35" aria-label="Music volume" />
+          <select id="musicPick" aria-label="Choose a station">
+            <option value="jfKfPfyJRdk">Lofi Girl radio</option>
+            <option value="lP26UCnoH9s">Coffee Shop Radio ☕</option>
+            <option value="kgx4WGK0oNU">Jazz / lofi hip hop 🌱</option>
+            <option value="CFGLoQIhmow">Lofi hip hop mix</option>
+            <option value="1Tl2FtV06qo">Asian lofi radio ⛩️</option>
+          </select>
+        </div>
       </div>
     </div>
-  </div>
-
-  <button class="util-collapse" id="utilCollapse" title="Hide">–</button>
+  
+    <button class="util-collapse" id="utilCollapse" title="Hide">–</button>  </div>
+  <button class="util-open" id="utilOpen" hidden data-tip="Start your hour" aria-label="Show focus timer and music">⏱</button>
+  <aside class="dock" id="dock">
+    <div class="dock-head">
+      <span class="dock-title">Study Buddy</span>
+      <button class="dock-min" id="dockToggle" aria-label="Hide study buddy">–</button>
+    </div>
+    <canvas id="gameCanvas" width="260" height="300" tabindex="0"
+            aria-label="A small game. Click it, then use W A S D or arrow keys to move the cat and collect fish."></canvas>
+    <div class="dock-foot">
+      <span class="dock-score" title="Fish eaten">🐟 <strong id="gameScore">0</strong></span>
+      <span class="dock-best" title="Highest score ever recorded">🏆 <strong id="gameBest">0</strong></span>
+      <span class="dock-lives" id="gameLives" title="Lives">♥♥♥</span>
+    </div>
+    <div class="dock-foot dock-foot2">
+      <span class="dock-hint" id="gameHint">click to play</span>
+      <span class="dock-foot-right">
+        <button class="dock-reset" id="gameTalk" title="Make the cat say something">💬</button>
+        <button class="dock-reset" id="gameSound" title="Mute / unmute">🔊</button>
+        <button class="dock-reset" id="gameReset" title="Reset score to zero">reset</button>
+      </span>
+    </div>
+  </aside>
+  <button class="dock-open" id="dockOpen" hidden data-tip="Let us play!" aria-label="Show study buddy">🐱</button>
+  </aside>
 </div>
-<button class="util-open" id="utilOpen" hidden aria-label="Show focus timer and music">⏱</button>
+
 <div id="ytHost" aria-hidden="true"><div id="ytPlayer"></div><div id="ytAbout"></div></div>
+
 
 <!-- ============ HOUR-UP MODAL ============ -->
 <div class="modal" id="hourModal" hidden role="dialog" aria-modal="true" aria-labelledby="hourTitle">
@@ -653,29 +678,6 @@
   </div>
 </div>
 
-<!-- ============ STUDY BUDDY (right gutter game) ============ -->
-<aside class="dock" id="dock">
-  <div class="dock-head">
-    <span class="dock-title">Study Buddy</span>
-    <button class="dock-min" id="dockToggle" aria-label="Hide study buddy">–</button>
-  </div>
-  <canvas id="gameCanvas" width="260" height="300" tabindex="0"
-          aria-label="A small game. Click it, then use W A S D or arrow keys to move the cat and collect fish."></canvas>
-  <div class="dock-foot">
-    <span class="dock-score" title="Fish eaten">🐟 <strong id="gameScore">0</strong></span>
-    <span class="dock-best" title="Highest score ever recorded">🏆 <strong id="gameBest">0</strong></span>
-    <span class="dock-lives" id="gameLives" title="Lives">♥♥♥</span>
-  </div>
-  <div class="dock-foot dock-foot2">
-    <span class="dock-hint" id="gameHint">click to play</span>
-    <span class="dock-foot-right">
-      <button class="dock-reset" id="gameTalk" title="Make the cat say something">💬</button>
-      <button class="dock-reset" id="gameSound" title="Mute / unmute">🔊</button>
-      <button class="dock-reset" id="gameReset" title="Reset score to zero">reset</button>
-    </span>
-  </div>
-</aside>
-<button class="dock-open" id="dockOpen" hidden aria-label="Show study buddy">🐱</button>
 
 <!-- ============ CERTIFICATE MODAL ============ -->
 <div class="modal" id="certModal" hidden role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
