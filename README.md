@@ -40,6 +40,9 @@ can't skip ahead.
   companion mode while you're actually studying
 - **Multiple profiles** on one browser, with export/import to move progress between devices
 - **Light and dark themes**, works down to phone widths
+- **Animated background** — a drifting colour glow, a faint grid with light beams, and a
+  slow network of workflow nodes with rising particles. Pauses in a hidden tab and stays
+  still when the device asks for reduced motion
 
 The certificates are not accredited and say so on the certificate itself. They record that
 you finished this roadmap, nothing more.
