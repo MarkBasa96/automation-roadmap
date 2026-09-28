@@ -4035,3 +4035,127 @@ window.addEventListener('pageshow', e => { if (e.persisted) Timer.repaint(); });
   // than silently locking you out of ever setting it.
   if (!(state.name || '').trim()) openWelcome();
 })();
+
+/* =========================================================
+   LIVING BACKGROUND
+   One fixed canvas behind the page: a slow network of
+   workflow "nodes" that link up when close, pulses that
+   travel along those links, and soft particles rising.
+   Pauses when the tab is hidden; static under reduced motion.
+   ========================================================= */
+(function () {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'bg-fx';
+  canvas.setAttribute('aria-hidden', 'true');
+  document.body.prepend(canvas);
+
+  const ctx = canvas.getContext('2d');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LINK = 150;                    // px — max distance for a link
+  let w, h, dpr, nodes = [], motes = [], pulses = [], raf = null, last = 0;
+
+  const isDark = () => document.documentElement.dataset.theme === 'dark';
+  const palette = () => isDark()
+    ? { node: '165,180,252', link: '129,140,248', mote: '196,181,253', pulse: '244,114,182' }
+    : { node: '99,102,241',  link: '99,102,241',  mote: '139,92,246',  pulse: '236,72,153' };
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth; h = window.innerHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // density scales with area so phones stay light
+    const nCount = Math.round(Math.min(70, Math.max(24, (w * h) / 22000)));
+    const mCount = Math.round(nCount * 0.8);
+    nodes = Array.from({ length: nCount }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22,
+      r: 1.4 + Math.random() * 1.8
+    }));
+    motes = Array.from({ length: mCount }, () => newMote(true));
+    pulses = [];
+  }
+
+  function newMote(anywhere) {
+    return {
+      x: Math.random() * w,
+      y: anywhere ? Math.random() * h : h + 10,
+      r: .6 + Math.random() * 1.8,
+      vy: .12 + Math.random() * .35,
+      drift: Math.random() * Math.PI * 2,
+      a: .15 + Math.random() * .45
+    };
+  }
+
+  function frame(t) {
+    const dt = Math.min(50, t - (last || t)) / 16.7;  // ~1 at 60fps
+    last = t;
+    const c = palette();
+    ctx.clearRect(0, 0, w, h);
+
+    // nodes drift and wrap
+    for (const n of nodes) {
+      n.x += n.vx * dt; n.y += n.vy * dt;
+      if (n.x < -20) n.x = w + 20; if (n.x > w + 20) n.x = -20;
+      if (n.y < -20) n.y = h + 20; if (n.y > h + 20) n.y = -20;
+    }
+
+    // links
+    ctx.lineWidth = 1;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+        if (d < LINK) {
+          ctx.strokeStyle = `rgba(${c.link},${(1 - d / LINK) * .14})`;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          // occasionally send a pulse down a fresh link
+          if (!reduced && pulses.length < 6 && Math.random() < .0006 * dt) pulses.push({ a, b, p: 0 });
+        }
+      }
+    }
+
+    // travelling pulses — "data moving through the workflow"
+    pulses = pulses.filter(p => {
+      p.p += .012 * dt;
+      const d = Math.hypot(p.a.x - p.b.x, p.a.y - p.b.y);
+      if (p.p >= 1 || d > LINK * 1.2) return false;
+      const x = p.a.x + (p.b.x - p.a.x) * p.p, y = p.a.y + (p.b.y - p.a.y) * p.p;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 9);
+      g.addColorStop(0, `rgba(${c.pulse},.9)`); g.addColorStop(1, `rgba(${c.pulse},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill();
+      return true;
+    });
+
+    // node dots
+    for (const n of nodes) {
+      ctx.fillStyle = `rgba(${c.node},.42)`;
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // rising motes
+    for (let i = 0; i < motes.length; i++) {
+      const m = motes[i];
+      m.y -= m.vy * dt; m.drift += .01 * dt;
+      const x = m.x + Math.sin(m.drift) * 12;
+      if (m.y < -10) { motes[i] = newMote(false); continue; }
+      const fade = Math.min(1, m.y / (h * .25));           // fade out near the top
+      ctx.fillStyle = `rgba(${c.mote},${m.a * fade})`;
+      ctx.beginPath(); ctx.arc(x, m.y, m.r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    if (!reduced) raf = requestAnimationFrame(frame);
+  }
+
+  function start() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
+  function stop()  { if (raf) cancelAnimationFrame(raf); raf = null; }
+
+  resize();
+  window.addEventListener('resize', () => { resize(); if (reduced) frame(0); });
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : (reduced ? null : start()));
+  // redraw once on theme change so the static (reduced-motion) frame recolours too
+  new MutationObserver(() => reduced && frame(0))
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  reduced ? frame(0) : start();
+})();
