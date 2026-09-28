@@ -3,7 +3,29 @@
 A self-paced 12-week study tracker I built to teach myself the tools an automation-focused
 virtual assistant gets hired for.
 
-**Live:** https://markbasa96.github.io/automation-roadmap/
+**Live:** https://automation-roadmap-nine.vercel.app
+(also on GitHub Pages: https://markbasa96.github.io/automation-roadmap/)
+
+![Overview page in light mode](docs/screenshots/overview-light.png)
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/overview-dark.png" alt="Overview page in dark mode"></td>
+    <td><img src="docs/screenshots/calendar-dark.png" alt="84-day calendar with the first five days checked off"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Dark mode</sub></td>
+    <td align="center"><sub>84-day calendar</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/screenshots/mobile-light.png" alt="Overview page on a phone" width="300">
+  <br><sub>On a phone</sub>
+</p>
+
+The background is animated in the real thing (drifting glow, light beams on a grid, and a slow
+network of workflow nodes) — open the live link to see it move.
 
 ---
 
@@ -54,6 +76,10 @@ Plain HTML, CSS and JavaScript. No frameworks, no build step, no package manager
 - `index.html` — structure and static content
 - `style.css` — styling, themes, print styles, responsive breakpoints
 - `script.js` — roadmap data, progress, unlocking, certificates, timer, music, game
+- `docs/screenshots/` — the images in this README
+
+Hosted on Vercel, linked to this repo — every push to `main` redeploys automatically.
+GitHub Pages serves the same files as a second copy.
 
 Progress is stored in the browser's `localStorage`, so every visitor keeps their own and
 nothing is sent anywhere. Because it's per-browser, progress doesn't sync between devices on
